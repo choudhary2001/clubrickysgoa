@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="relative min-h-[650px] flex items-center justify-center text-center px-4 md:px-8">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/about_banner.png');"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
+            <h1
+                class="text-4xl md:text-6xl font-bold tracking-wider text-white"
+               
+            >CONTACT US
+            </h1>
+
+        </div>
+    </section>
+
+    <!-- Ambiance Section -->
+    <section class="container p-6 mx-auto flex flex-col justify-center">
+        <p class="text-center text-[#C4302B]">We would love to hear from you! Get in touch with us.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="grid md:grid-cols-2 gap-10 mt-10">
+            <!-- Contact Form -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <form id="contact-form" action="{% url 'contact' %}" method="post" class="contact-form">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="block text-[#C4302B]" for="name">Name</label>
+                        <input type="text" id="name" name="name" required class="w-full p-2 mt-2 bg-transparent text-gray-900 rounded-lg outline-none ring-2 ring-[#C4302B]">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[#C4302B]" for="email">Email</label>
+                        <input type="email" id="email" name="email" required class="w-full p-2 mt-2 bg-transparent text-gray-900 rounded-lg outline-none ring-2 ring-[#C4302B]">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[#C4302B]" for="message">Message</label>
+                        <textarea id="message" name="message" required rows="4" class="w-full p-2 mt-2 bg-transparent text-gray-900 rounded-lg outline-none ring-2 ring-[#C4302B]"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-[#C4302B] text-white py-2 rounded-lg hover:bg-red-700 transition">Send Message</button>
+                </form>
+            </div>
+    
+            <!-- Contact Info -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-[#C4302B]">Get in Touch</h3>
+                <p class="mt-4 text-gray-900">Reach us via the following contact details:</p>
+                <ul class="mt-4 space-y-4 text-gray-900">
+                    <li><i class="fas fa-phone-alt text-[#C4302B]"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope text-[#C4302B]"></i> contact@clubrickys.com</li>
+                    <li><i class="fas fa-map-marker-alt text-[#C4302B]"></i> Goa, India</li>
+                </ul>
+                <div class="flex space-x-4 mt-6">
+                    <a href="#" class="text-[#C4302B] text-2xl hover:text-red-500"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-[#C4302B] text-2xl hover:text-red-500"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-[#C4302B] text-2xl hover:text-red-500"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+
+{% endblock %}
+

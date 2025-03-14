@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-[400px] flex items-center justify-center text-center px-4 md:px-8">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-27.jpg');"></div>
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 space-y-4">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">Privacy Policy</h1>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="prose prose-lg max-w-none">
+            <h2 class="text-3xl font-bold mb-6">1. Information We Collect</h2>
+            <p class="mb-6">We collect information that you provide directly to us, including:</p>
+            <ul class="list-disc pl-6 mb-6">
+                <li class="mb-3">Name and contact information</li>
+                <li class="mb-3">Payment information</li>
+                <li class="mb-3">Profile information</li>
+                <li class="mb-3">Communication preferences</li>
+            </ul>
+
+            <h2 class="text-3xl font-bold mb-6">2. How We Use Your Information</h2>
+            <p class="mb-6">We use the information we collect to:</p>
+            <ul class="list-disc pl-6 mb-6">
+                <li class="mb-3">Process your bookings and payments</li>
+                <li class="mb-3">Send you important updates about our services</li>
+                <li class="mb-3">Improve our services and user experience</li>
+                <li class="mb-3">Comply with legal obligations</li>
+            </ul>
+
+            <h2 class="text-3xl font-bold mb-6">3. Information Security</h2>
+            <p class="mb-6">We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+
+            <h2 class="text-3xl font-bold mb-6">4. Your Rights</h2>
+            <p class="mb-6">You have the right to:</p>
+            <ul class="list-disc pl-6 mb-6">
+                <li class="mb-3">Access your personal information</li>
+                <li class="mb-3">Request corrections to your data</li>
+                <li class="mb-3">Request deletion of your data</li>
+                <li class="mb-3">Opt-out of marketing communications</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %} 

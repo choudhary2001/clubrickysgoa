@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<style>
+    /* Style form inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"] {
+        @apply block w-full rounded-md border-gray-300 pr-10
+               focus:border-[#C4302B] focus:ring focus:ring-[#C4302B] focus:ring-opacity-50 
+               transition-shadow sm:text-sm;
+    }
+
+    /* Style file input */
+    input[type="file"] {
+        @apply hidden;
+    }
+
+    /* Custom file input trigger */
+    .file-input-trigger {
+        @apply inline-flex items-center px-4 py-2 border border-transparent 
+               rounded-full shadow-sm text-sm font-medium text-white 
+               bg-[#C4302B] hover:bg-opacity-90 transition-colors 
+               cursor-pointer;
+    }
+
+    /* Hover effects for form fields */
+    .form-field-wrapper:hover {
+        @apply border-[#C4302B]/20;
+    }
+
+    /* Focus styles for form fields */
+    .form-field-wrapper:focus-within {
+        @apply border-[#C4302B] ring-1 ring-[#C4302B];
+    }
+
+    #id_username, #id_email, #id_password1, #id_password2, #id_phone_number, #id_birth_date, #id_address, #id_bio, #id_first_name, #id_last_name{
+        width: 100% !important;
+        border: 1px solid #C4302B !important;
+        border-radius: 5px !important;
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+        font-size: 16px !important;
+        color: #333 !important;
+        background-color: #fff !important;
+        transition: border-color 0.3s ease;
+    }
+</style>
+<!-- Hero Section -->
+<section class="relative min-h-[300px] flex items-center justify-center text-center px-4 md:px-8">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-27.jpg');"></div>
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 space-y-4">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">Edit Profile</h1>
+    </div>
+</section>
+
+<!-- Edit Profile Form Section -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-8">
+                    <!-- Profile Picture Preview -->
+                    <div class="flex flex-col items-center mb-12">
+                        <div class="relative group cursor-pointer">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" 
+                                     alt="Profile Picture" 
+                                     class="w-32 h-32 rounded-full object-cover ring-4 ring-[#C4302B]/20">
+                            {% else %}
+                                <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center ring-4 ring-[#C4302B]/20">
+                                    <span class="material-icons-outlined text-gray-400" style="font-size: 64px;">account_circle</span>
+                                </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                <span class="material-icons-outlined text-white">photo_camera</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-3">Click to change profile picture</p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="space-y-8">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="space-y-2">
+                            {% if field.name != 'profile_picture' %}
+                            <div class="relative rounded-lg border border-gray-200 bg-white p-4 hover:border-[#C4302B]/20 transition-colors group">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 flex items-center mb-3">
+                                    {% if field.name == 'email' %}
+                                        <span class="material-icons-outlined mr-2 text-[#C4302B]">email</span>
+                                    {% elif field.name == 'phone_number' %}
+                                        <span class="material-icons-outlined mr-2 text-[#C4302B]">phone</span>
+                                    {% elif field.name == 'birth_date' %}
+                                        <span class="material-icons-outlined mr-2 text-[#C4302B]">cake</span>
+                                    {% elif field.name == 'address' %}
+                                        <span class="material-icons-outlined mr-2 text-[#C4302B]">location_on</span>
+                                    {% elif field.name == 'bio' %}
+                                        <span class="material-icons-outlined mr-2 text-[#C4302B]">description</span>
+                                    {% endif %}
+                                    {{ field.label }}
+                                </label>
+                                
+                                <div class="relative">
+                                    {% if field.name == 'bio' %}
+                                        <textarea name="{{ field.name }}" 
+                                                id="{{ field.id_for_label }}"
+                                                class="block w-full rounded-md border-gray-300 focus:border-[#C4302B] focus:ring focus:ring-[#C4302B] focus:ring-opacity-50 transition-shadow sm:text-sm"
+                                                rows="4"
+                                                placeholder="Tell us about yourself">{{ field.value|default:'' }}</textarea>
+                                    {% else %}
+                                        <div class="relative">
+                                            {{ field }}
+                                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-[#C4302B] transition-colors">
+                                                {% if field.name == 'email' %}
+                                                    <span class="material-icons-outlined">edit</span>
+                                                {% elif field.name == 'phone_number' %}
+                                                    <span class="material-icons-outlined">edit</span>
+                                                {% elif field.name == 'birth_date' %}
+                                                    <span class="material-icons-outlined">event</span>
+                                                {% elif field.name == 'address' %}
+                                                    <span class="material-icons-outlined">edit_location</span>
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                {% if field.help_text %}
+                                <p class="mt-2 text-sm text-gray-500">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="mt-2 text-sm text-red-600 flex items-center">
+                                    <span class="material-icons-outlined mr-1" style="font-size: 16px;">error_outline</span>
+                                    {{ field.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="flex justify-end space-x-3 pt-6">
+                            <a href="{% url 'profile' %}" 
+                               class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <span class="material-icons-outlined mr-2" style="font-size: 18px;">arrow_back</span>
+                                Back to Profile
+                            </a>
+                            <button type="submit" 
+                                    class="inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-[#C4302B] hover:bg-opacity-90 transition-colors">
+                                <span class="material-icons-outlined mr-2" style="font-size: 18px;">save</span>
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

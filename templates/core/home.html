@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="relative min-h-[950px] flex items-center justify-center text-center px-4 md:px-8">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-30.jpg');"></div>
+        <div class="absolute inset-0">
+            <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                <source src="/media/Club Rickys Tv Reel horizontal Part 2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
+            <img
+                class="text-4xl md:text-6xl font-bold tracking-wider text-white"
+                src="/media/CLUB RICKY’S.png"
+            />
+
+            <div class="mt-8 md:mt-8 text-xl md:text-2xl font-black uppercase tracking-wide text-white" style="margin-top: 35px;">
+                BY TITO'S
+            </div>
+
+            <div class="mt-6 md:mt-12 text-2xl md:text-3xl uppercase font-light tracking-wider text-white" style="font-weight: 100; margin-top: 35px;">
+                Where the beach meets the beat!
+            </div>
+
+            <a href="/events/"
+                class="px-4 md:px-4 py-4 md:py-4 mt-22 md:mt-28 text-xl md:text-2xl text-black bg-white  shadow-sm rounded-full w-auto md:w-[150px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" style="margin-top: 35px;"
+                aria-label="Explore Club Ricky's"
+            >
+                Explore
+        </a>
+        </div>
+    </section>
+
+
+    <!-- Services Section -->
+    <section class="py-16 container mx-auto px-4">
+        <h2 class="mt-1 text-2xl font-bold text-red-700 uppercase text-center">Our Services</h2>
+        <div class="flex items-center justify-center" >
+            <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/8f4c4e432af6e19497be8eae1aee827fecf975b154943dbcff1ee464d12bfa5a?placeholderIfAbsent=true&apiKey=2a454d8142b847a4b0ac26be6efc2b89" alt="" class="object-contain mt-2 aspect-[15.38] w-[92px] max-md:mt-2" />
+        </div>
+        <h3 class="mt-2 text-4xl font-black text-black max-md:max-w-full max-md:text-4xl text-center ">WHAT WE OFFER</h3>
+      
+        <div class="mt-12 w-full  max-md:mt-10 max-md:max-w-full">
+          <div class="flex gap-5 max-md:flex-col">
+            <article class="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
+              <div class="flex flex-col grow px-px pt-px pb-10 w-full  font-semibold text-red-700  bg-white border border-black border-solid shadow-[-8px_11px_0px_rgba(0,0,0,0.25)] max-md:mt-10">
+                <img loading="lazy" src="/media/0F9A1253.jpg" alt="Signature cocktails selection" class="object-cover w-full aspect-[1.04]" />
+                <h4 class="mt-6 text-2xl text-center">Beachside Pool Club</h4>
+                <p class="mt-2 text-center text-gray-600 p-2">Relax and party by the pool with stunning beach views, creating an unforgettable atmosphere.</p>
+              </div>
+            </article>
+            <article class="flex flex-col ml-5 w-[24%] max-md:ml-0 max-md:w-full">
+              <div class="flex flex-col grow px-px pt-px pb-11 w-full  font-semibold text-red-700  bg-white border border-black border-solid shadow-[-8px_11px_0px_rgba(0,0,0,0.25)] max-md:mt-10">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1541126274323-dbac58d14741?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="object-cover w-full aspect-[1.04]" />
+
+                <h4 class="mt-6 text-2xl text-center">Live Music & DJs</h4>
+                <p class="mt-2 text-center text-gray-600 p-2">Experience live music performances and DJ sets that keep the energy high throughout the night.</p>
+              </div>
+            </article>
+            <article class="flex flex-col ml-5 w-[24%] max-md:ml-0 max-md:w-full">
+                <div class="flex flex-col grow px-px pt-px pb-11 w-full  font-semibold text-red-700  bg-white border border-black border-solid shadow-[-8px_11px_0px_rgba(0,0,0,0.25)] max-md:mt-10">
+                    <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/5276f89b1aac4aaf77d1b9f5e4caee1675c5cabd909a742bc20cabdb070ed500?placeholderIfAbsent=true&apiKey=2a454d8142b847a4b0ac26be6efc2b89" alt="Gourmet meal offerings" class="object-contain w-full aspect-[1.04]" />
+                <h4 class="mt-6 text-2xl text-center">Delicious Cuisine</h4>
+                <p class="mt-2 text-center text-gray-600 p-2">Indulge in a diverse menu featuring a mix of international and local dishes to satisfy your cravings.</p>
+              </div>
+            </article>
+            <article class="flex flex-col ml-5 w-[24%] max-md:ml-0 max-md:w-full">
+                <div class="flex flex-col grow px-px pt-px pb-11 w-full  font-semibold text-red-700  bg-white border border-black border-solid shadow-[-8px_11px_0px_rgba(0,0,0,0.25)] max-md:mt-10">
+                <img loading="lazy"  src="https://cdn.builder.io/api/v1/image/assets/TEMP/66fe58cb5456d66e357e4b90a83b72fc2fe76b42b2e770ea75b1a1e06ecd2921?placeholderIfAbsent=true&apiKey=2a454d8142b847a4b0ac26be6efc2b89" class="object-cover w-full aspect-[1.04]" />
+                <h4 class="mt-6 text-2xl text-center">Signature Cocktails & Mocktails</h4>
+                <p class="mt-2 text-center text-gray-600 p-2">Enjoy expertly crafted beverages, including unique cocktails and mocktails, to enhance your evening.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+    </section>
+
+
+    <!-- Ambiance Section -->
+    <section class="py-8 ">
+        <div class="container-fluid  mx-auto">
+            <h2 class="mb-16 text-4xl font-black text-black max-md:max-w-full max-md:text-4xl text-center">OUR AMBIANCE</h2>
+            <div class="flex flex-col border-t-[10px] border-b-[10px] border-t-[#B82F2E] border-b-[#B82F2E] pt-6 pb-6">
+                <img src="/media/ambiance1.png" class="mb-8" />
+                <img src="/media/ambiance2.png" />
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Reservations Section -->
+    <section class="py-8 container mx-auto px-4">
+        <h2 class="mb-16 text-4xl font-black text-black max-md:max-w-full max-md:text-4xl text-center uppercase mb-12">Make a Reservation</h2>
+        
+        <section class="mx-auto bg-white shadow-[-12px_13px_4px_rgba(0,0,0,0.25)] lg:w-[1173px] w-full md:px-8 px-4">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Left Column -->
+                <div class="md:w-1/2 w-full flex flex-col p-8 md:p-16">
+                    <h3 class="text-3xl md:text-4xl font-medium text-red-700 mb-8">Working Hours</h3>
+                    <p class="text-lg md:text-xl text-gray-700 font-medium">Open All Days</p>
+                    <p class="text-lg md:text-xl text-gray-700 font-medium">6:00 PM Onwards</p>
+                    
+                    <div class="flex flex-col md:flex-row items-center gap-4 mt-12">
+                        <a href="/events/" class="w-full md:w-auto px-8 py-4 text-white bg-red-700 rounded-full text-lg md:text-2xl text-center">
+                            Book a Table
+                        </a>
+                        <a href="/contact/" class="w-full md:w-auto text-red-700 text-lg md:text-2xl text-center md:text-left">
+                            Contact Us
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="md:w-1/2 w-full bg-red-700 text-white p-8 md:p-16">
+                    <h3 class="text-3xl md:text-4xl font-medium mb-6">Timings</h3>
+                    <ul class="text-lg md:text-xl font-medium space-y-2">
+                        <li>Monday - Sunday: <span class="font-semibold">6:00 PM – 12:00 AM</span></li>
+                        <li>Special Events: <span class="font-semibold">On Request</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </section>
+
+
+    <!-- Testimonials Section -->
+    <section class="py-8 container mx-auto px-4">
+    <div class="tagembed-widget" style="width:100%;height:100%" data-widget-id="2155474" data-tags="false"  view-url="https://widget.tagembed.com/2155474"></div><script src="https://widget.tagembed.com/embed.min.js" type="text/javascript"></script>
+    </section>
+    
+{% endblock %} 

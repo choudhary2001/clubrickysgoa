@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Refund Policy - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-[400px] flex items-center justify-center text-center px-4 md:px-8">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-27.jpg');"></div>
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 space-y-4">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">Refund Policy</h1>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="prose prose-lg max-w-none">
+            <h2 class="text-3xl font-bold mb-6">1. Event Cancellation by Club Ricky's Goa</h2>
+            <p class="mb-6">If an event is cancelled by Club Ricky's Goa, you will receive a full refund of the ticket price within 7-10 business days.</p>
+
+            <h2 class="text-3xl font-bold mb-6">2. Cancellation by Customer</h2>
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <h3 class="text-xl font-semibold mb-4">Refund Schedule:</h3>
+                <ul class="list-none space-y-3">
+                    <li class="flex items-center">
+                        <span class="w-48">7+ days before event:</span>
+                        <span class="font-semibold text-green-600">100% refund</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-48">3-6 days before event:</span>
+                        <span class="font-semibold text-yellow-600">50% refund</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="w-48">0-2 days before event:</span>
+                        <span class="font-semibold text-red-600">No refund</span>
+                    </li>
+                </ul>
+            </div>
+
+            <h2 class="text-3xl font-bold mb-6">3. Refund Process</h2>
+            <p class="mb-6">To request a refund:</p>
+            <ol class="list-decimal pl-6 mb-6">
+                <li class="mb-3">Contact our support team</li>
+                <li class="mb-3">Provide your booking reference</li>
+                <li class="mb-3">State your reason for cancellation</li>
+                <li class="mb-3">Choose your preferred refund method</li>
+            </ol>
+
+            <h2 class="text-3xl font-bold mb-6">4. Processing Time</h2>
+            <p class="mb-6">Refunds are typically processed within 5-7 business days, depending on your payment method and bank.</p>
+        </div>
+    </div>
+</section>
+{% endblock %} 

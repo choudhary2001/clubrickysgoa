@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Events - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="relative min-h-[650px] flex items-center justify-center text-center px-4 md:px-8">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-60.jpg');"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">Upcoming Events</h1>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section class="py-16">
+        <div class="container mx-auto">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="mt-12 flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                {% for event in events %}
+                    <div class="bg-white shadow-lg border-4 border-red-600 w-[30%] min-w-[300px] relative">
+                        <!-- Date Badge -->
+                        <div class="absolute -top-4 left-4 bg-red-700 text-white px-4 py-2 rounded-b-md text-center font-bold">
+                            <span class="block text-lg">{{ event.date|date:"d" }}</span>
+                            <span class="block text-sm">{{ event.date|date:"M" }}</span>
+                        </div>
+
+                        <!-- Event Image -->
+                        {% if event.image %}
+                            <img class="h-64 w-full object-cover" src="{{ event.image.url }}" alt="{{ event.title }}"/>
+                        {% else %}
+                            <div class="h-64 w-full bg-gray-200 flex items-center justify-center">
+                                <span class="material-icons-outlined text-gray-400 text-6xl">event</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Event Details -->
+                        <div class="p-6">
+                            <h3 class="font-bold text-lg">{{ event.title }}</h3>
+                            <div class="mt-2 space-y-2 text-gray-600 text-sm">
+                                <!-- Time -->
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">schedule</span>
+                                    {{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}
+                                </div>
+                                <!-- Location -->
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">location_on</span>
+                                    {{ event.location }}
+                                </div>
+                                <!-- Pricing -->
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center">
+                                        <span class="material-icons-outlined text-red-600 mr-2">person</span>
+                                        ₹{{ event.stag_fee }}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="material-icons-outlined text-red-600 mr-2">people</span>
+                                        ₹{{ event.couple_fee }}
+                                    </div>
+                                </div>
+                                <!-- Available Seats -->
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">event_seat</span>
+                                    {{ event.available_seats }} seats available
+                                </div>
+                            </div>
+
+                            {% if event.is_active and event.available_seats > 0 %}
+                                <form method="post" action="{% url 'book_event' event.id %}" class="mt-4">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full bg-red-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-800 transition">
+                                        Book Now
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button disabled class="w-full bg-gray-400 text-white font-bold py-2 px-6 rounded-lg mt-4 cursor-not-allowed">
+                                    {% if not event.is_active %}Event Closed{% else %}Sold Out{% endif %}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-gray-600 py-8">
+                        <span class="material-icons-outlined text-6xl mb-4">event_busy</span>
+                        <p class="text-xl">No upcoming events at the moment.</p>
+                        <p class="mt-2">Please check back later for new events!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

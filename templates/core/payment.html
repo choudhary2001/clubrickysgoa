@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - {{ booking.event.title }} - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto">
+            <!-- Payment Summary -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-4">Booking Summary</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span>Event:</span>
+                        <span class="font-medium">{{ booking.event.title }}</span>
+                    </div>
+                    {% if booking.stag_count > 0 %}
+                    <div class="flex justify-between">
+                        <span>Stag Tickets:</span>
+                        <span>{{ booking.stag_count }} × ₹{{ booking.event.stag_fee }}</span>
+                    </div>
+                    {% endif %}
+                    {% if booking.couple_count > 0 %}
+                    <div class="flex justify-between">
+                        <span>Couple Tickets:</span>
+                        <span>{{ booking.couple_count }} × ₹{{ booking.event.couple_fee }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between text-lg font-bold pt-4 border-t">
+                        <span>Total Amount:</span>
+                        <span>₹{{ booking.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4">Secure Payment</h3>
+                <div id="easebuzz-checkout-frame"></div>
+                <div class="mt-4 text-sm text-gray-500 flex items-center justify-center">
+                    <span class="material-icons-outlined mr-2">security</span>
+                    Secured by Easebuzz Payment Gateway
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Easebuzz Integration Script -->
+<script src="https://ebz-static.s3.ap-south-1.amazonaws.com/easecheckout/easebuzz-checkout.js"></script>
+<script>
+    var easebuzzCheckout = new EasebuzzCheckout('{{ payment_data.key }}', 'prod')
+    var options = {
+        access_key: '{{ payment_data.hash }}', 
+        onResponse: function(response) {
+            console.log(response);
+            if(response.status === 'success') {
+                window.location.href = '{% url "payment_success" %}?txnid=' + response.txnid;
+            } else {
+                window.location.href = '{% url "payment_failure" %}?txnid=' + response.txnid;
+            }
+        },
+        theme: '#C4302B' // Your site's primary color
+    }
+    
+    // Initialize payment
+    document.addEventListener('DOMContentLoaded', function() {
+        easebuzzCheckout.initiatePayment(options);
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Rickey's Goa - Coming Soon</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('/media/image.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5); /* Black overlay with 50% opacity */
+            z-index: -1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+    <div class="content text-center text-white">
+        <h1 class="text-6xl font-bold mb-4">Club Ricky's Goa</h1>
+        <p class="text-2xl mb-8">Website Under Construction</p>
+        <p class="text-lg mb-8">We're working to bring you an amazing experience. Stay tuned!</p>
+        <div class="flex justify-center space-x-4">
+            <a href="tel:+917350552266" class="bg-transparent border border-white hover:bg-white hover:text-gray-900 text-white px-6 py-2 rounded-full">Contact Us</a>
+        </div>
+    </div>
+</body>
+</html>

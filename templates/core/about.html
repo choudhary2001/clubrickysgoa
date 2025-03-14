@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="relative min-h-[650px] flex items-center justify-center text-center px-4 md:px-8">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/0F9A1587.jpg');"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
+            <h1
+                class="text-4xl md:text-6xl font-bold tracking-wider text-white"
+               
+            >ABOUT US                                 
+            </h1>
+
+        </div>
+    </section>
+
+    <section class="py-16 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h2 class="text-4xl font-extrabold ">What We Offer</h2>
+            <p class="mt-4 text-gray-600 text-lg">Experience an electrifying nightlife at Club Ricky's, located in Tito's Lane, Baga, Goa.</p>
+        </div>
+
+        <div class="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+            <!-- Beachside Pool Club -->
+            <div class="p-6 bg-gray-200 rounded-lg shadow-lg text-center">
+                <div class="text-[#C4302B] text-4xl mb-4">🌊</div>
+                <h3 class="text-2xl font-semibold text-[#C4302B]">Beachside Pool Club</h3>
+                <p class="mt-2 text-gray-600">Relax and party by the pool with stunning beach views, creating an unforgettable atmosphere.</p>
+            </div>
+
+            <!-- Live Music and DJs -->
+            <div class="p-6 bg-gray-200 rounded-lg shadow-lg text-center">
+                <div class="text-[#C4302B] text-4xl mb-4">🎶</div>
+                <h3 class="text-2xl font-semibold text-[#C4302B]">Live Music & DJs</h3>
+                <p class="mt-2 text-gray-600">Experience live music performances and DJ sets that keep the energy high throughout the night.</p>
+            </div>
+
+            <!-- Delicious Cuisine -->
+            <div class="p-6 bg-gray-200 rounded-lg shadow-lg text-center">
+                <div class="text-[#C4302B] text-4xl mb-4">🍽️</div>
+                <h3 class="text-2xl font-semibold text-[#C4302B]">Delicious Cuisine</h3>
+                <p class="mt-2 text-gray-600">Indulge in a mix of international and local dishes to satisfy your culinary cravings.</p>
+            </div>
+
+            <!-- Signature Cocktails -->
+            <div class="p-6 bg-gray-200 rounded-lg shadow-lg text-center">
+                <div class="text-[#C4302B] text-4xl mb-4">🍹</div>
+                <h3 class="text-2xl font-semibold text-[#C4302B]">Signature Cocktails</h3>
+                <p class="mt-2 text-gray-600">Enjoy expertly crafted cocktails and mocktails to enhance your evening.</p>
+            </div>
+        </div>
+    </section>
+
+    
+    <!-- Ambiance Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6 lg:px-12">
+            <!-- History Section -->
+            <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-10">Our History</h2>
+            <div class="grid md:grid-cols-2 gap-10 items-center">
+                <div class="space-y-4">
+                    <p class="text-gray-600 leading-relaxed">
+                        It all started in 1971 when Tito Henry De Souza opened a small beachfront restaurant in Baga, unknowingly laying the foundation for Goa’s most legendary nightlife empire. What began as a cozy dining spot soon evolved into the iconic Tito’s Group, turning Tito’s Lane into the party capital of India.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        Club Ricky’s was introduced as a complete experience—offering a vibrant mix of Goan and Indian cuisine, along with an extensive drink menu. By night, it transforms into an electrifying hotspot with high-energy beats, a vibrant dance floor, and a beachside pool vibe that keeps the party alive well into the night.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        With its 2024 Martin Audio upgrade, Club Ricky’s isn’t just keeping up ~ it’s setting the standard. If you're looking for great food, drinks, and a night that feels like a festival, Club Ricky’s is where you need to be.
+                    </p>
+                </div>
+                <div>
+                    <img src="/media/FL-5.jpg" class="rounded-lg shadow-lg w-full" alt="Club Ricky's History">
+                </div>
+            </div>
+        </div>
+    
+        <!-- Mission Section -->
+        <div class="container mx-auto px-6 lg:px-12 mt-16">
+            <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-10">Our Mission</h2>
+            <div class="grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <img src="/media/FL-30.jpg" class="rounded-lg shadow-lg w-full" alt="Our Mission">
+                </div>
+                <div class="space-y-4">
+                    <p class="text-gray-600 leading-relaxed">
+                        At Club Ricky’s Goa, our mission is to deliver an unparalleled nightlife experience that embodies the vibrant, energetic spirit of Goa.
+                    </p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-2">
+                        <li><strong>Excellence:</strong> From the quality of our services to the unforgettable moments we create, we strive for excellence in everything we do.                        </li>
+                        <li><strong>Hospitality:</strong> We believe in the heart of Goan hospitality ~ welcoming our guests with warmth, friendliness, and genuine care, making sure everyone feels right at home.</li>
+                        <li><strong>Innovation:</strong> We're all about staying ahead of the curve, bringing new and exciting experiences that keep our patrons coming back for more.                        </li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed">
+                        By staying true to these values, Club Ricky’s aims to be the ultimate destination for music, culture, and entertainment, offering an experience that’s as unforgettable as Goa itself.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    
+{% endblock %}

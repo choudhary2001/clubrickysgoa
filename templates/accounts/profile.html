@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <!-- Profile Header -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                            <span class="material-icons-outlined text-3xl text-red-600">person</span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
+                            <p class="text-gray-600">{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'edit_profile' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <span class="material-icons-outlined mr-2">edit</span>
+                        Edit Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="material-icons-outlined mr-2">person_outline</span>
+                    Profile Details
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <p class="mt-1 text-gray-900">{{ user.get_full_name|default:"Not set" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Username</label>
+                        <p class="mt-1 text-gray-900">{{ user.username }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <p class="mt-1 text-gray-900">{{ user.email }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Phone</label>
+                        <p class="mt-1 text-gray-900">{{ user.profile.phone|default:"Not set" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Bookings Section -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="border-b border-gray-200">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold flex items-center">
+                            <span class="material-icons-outlined mr-2">confirmation_number</span>
+                            My Bookings
+                        </h2>
+                    </div>
+                </div>
+
+                {% if bookings %}
+                <div class="divide-y divide-gray-200">
+                    {% for booking in bookings %}
+                    <div class="p-6 hover:bg-gray-50 transition duration-150">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                            <!-- Event Info -->
+                            <div class="flex-1">
+                                <div class="flex items-start space-x-4">
+                                    <!-- Event Image -->
+                                    <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                        {% if booking.event.image %}
+                                            <img src="{{ booking.event.image.url }}" alt="{{ booking.event.title }}" 
+                                                 class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                <span class="material-icons-outlined text-gray-400">event</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Event Details -->
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ booking.event.title }}</h3>
+                                        <div class="mt-1 space-y-1">
+                                            <p class="text-sm text-gray-600 flex items-center">
+                                                <span class="material-icons-outlined text-gray-400 text-base mr-1">event</span>
+                                                {{ booking.event.date|date:"D, d M Y" }}
+                                            </p>
+                                            <p class="text-sm text-gray-600 flex items-center">
+                                                <span class="material-icons-outlined text-gray-400 text-base mr-1">schedule</span>
+                                                {{ booking.event.start_time|time:"g:i A" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Booking Details -->
+                            <div class="flex flex-col space-y-2 md:text-right">
+                                <div class="flex items-center justify-between md:justify-end md:space-x-4">
+                                    {% if booking.stag_count > 0 %}
+                                    <span class="text-sm text-gray-600">{{ booking.stag_count }} Stag</span>
+                                    {% endif %}
+                                    {% if booking.couple_count > 0 %}
+                                    <span class="text-sm text-gray-600">{{ booking.couple_count }} Couple</span>
+                                    {% endif %}
+                                    <span class="font-semibold">₹{{ booking.total_amount }}</span>
+                                </div>
+                                <div class="flex items-center justify-between md:justify-end md:space-x-4">
+                                    <span class="text-xs text-gray-500">#{{ booking.booking_reference }}</span>
+                                    {% if booking.payment_status == 'COMPLETED' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <span class="material-icons-outlined text-base mr-1">check_circle</span>
+                                            Confirmed
+                                        </span>
+                                    {% elif booking.payment_status == 'PENDING' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <span class="material-icons-outlined text-base mr-1">pending</span>
+                                            Pending
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <span class="material-icons-outlined text-base mr-1">error</span>
+                                            Failed
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 flex items-center justify-end space-x-3">
+                            {% if booking.payment_status == 'COMPLETED' %}
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    <span class="material-icons-outlined text-base mr-1">download</span>
+                                    Download Ticket
+                                </button>
+                            {% elif booking.payment_status == 'FAILED' %}
+                                <a href="{% url 'book_event' booking.event.id %}" class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    <span class="material-icons-outlined text-base mr-1">refresh</span>
+                                    Try Again
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                        <span class="material-icons-outlined text-3xl text-gray-400">event_busy</span>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Bookings Yet</h3>
+                    <p class="text-gray-600 mb-4">You haven't made any bookings yet.</p>
+                    <a href="{% url 'events' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                        <span class="material-icons-outlined mr-2">event</span>
+                        Browse Events
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

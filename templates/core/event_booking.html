@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ event.title }} - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+    <!-- Event Details Section -->
+    <div class="bg-gray-50 min-h-screen py-12">
+        <div class="container mx-auto px-4">
+            <!-- Breadcrumb -->
+            <nav class="flex mb-8" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'events' %}" class="text-gray-700 hover:text-red-600">
+                            <span class="material-icons-outlined mr-2">arrow_back</span>
+                            Back to Events
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Event Details Card -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden">
+                    <!-- Event Image -->
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" class="w-full h-96 object-cover">
+                    {% else %}
+                        <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
+                            <span class="material-icons-outlined text-gray-400" style="font-size: 96px">event</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Event Info -->
+                    <div class="p-8">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ event.title }}</h1>
+                        
+                        <!-- Event Meta -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                            <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                                <span class="material-icons-outlined text-red-600 mb-2">event</span>
+                                <span class="text-sm text-gray-600">Date</span>
+                                <span class="font-semibold">{{ event.date|date:"D, M d, Y" }}</span>
+                            </div>
+                            <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                                <span class="material-icons-outlined text-red-600 mb-2">schedule</span>
+                                <span class="text-sm text-gray-600">Time</span>
+                                <span class="font-semibold">{{ event.start_time|time:"g:i A" }}</span>
+                            </div>
+                            <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                                <span class="material-icons-outlined text-red-600 mb-2">location_on</span>
+                                <span class="text-sm text-gray-600">Location</span>
+                                <span class="font-semibold">{{ event.location }}</span>
+                            </div>
+                            <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                                <span class="material-icons-outlined text-red-600 mb-2">event_seat</span>
+                                <span class="text-sm text-gray-600">Available</span>
+                                <span class="font-semibold">{{ event.available_seats }} seats</span>
+                            </div>
+                        </div>
+
+                        <!-- Event Description -->
+                        <div class="prose max-w-none">
+                            <h2 class="text-xl font-semibold mb-4">About This Event</h2>
+                            <p class="text-gray-600">{{ event.description }}</p>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mt-8">
+                            <h2 class="text-xl font-semibold mb-4">Terms & Conditions</h2>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-gray-600 text-sm">{{ event.terms_and_conditions }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Card -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+                        <h2 class="text-2xl font-bold mb-6">Book Your Tickets</h2>
+                        
+                        <!-- Pricing Info -->
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">person</span>
+                                    <span>Stag Entry</span>
+                                </div>
+                                <span class="font-semibold">₹{{ event.stag_fee }}</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">people</span>
+                                    <span>Couple Entry</span>
+                                </div>
+                                <span class="font-semibold">₹{{ event.couple_fee }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Booking Form -->
+                        <form method="post" action="{% url 'process_booking' event.id %}" class="space-y-6">
+                            {% csrf_token %}
+                            
+                            <!-- Stag Tickets -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Number of Stag Tickets
+                                </label>
+                                <div class="flex items-center">
+                                    <button type="button" onclick="updateQuantity('stag', -1)" 
+                                            class="bg-gray-200 text-gray-600 hover:bg-gray-300 h-10 w-10 rounded-l-lg flex items-center justify-center">
+                                        <span class="material-icons-outlined">remove</span>
+                                    </button>
+                                    <input type="number" name="stag_count" id="stag_count" value="0" min="0" max="4" readonly
+                                           class="h-10 w-20 text-center border-y border-gray-300 [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                    <button type="button" onclick="updateQuantity('stag', 1)"
+                                            class="bg-gray-200 text-gray-600 hover:bg-gray-300 h-10 w-10 rounded-r-lg flex items-center justify-center">
+                                        <span class="material-icons-outlined">add</span>
+                                    </button>
+                                    <span class="ml-3 text-gray-600">₹{{ event.stag_fee }} each</span>
+                                </div>
+                            </div>
+
+                            <!-- Couple Tickets -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Number of Couple Tickets
+                                </label>
+                                <div class="flex items-center">
+                                    <button type="button" onclick="updateQuantity('couple', -1)"
+                                            class="bg-gray-200 text-gray-600 hover:bg-gray-300 h-10 w-10 rounded-l-lg flex items-center justify-center">
+                                        <span class="material-icons-outlined">remove</span>
+                                    </button>
+                                    <input type="number" name="couple_count" id="couple_count" value="0" min="0" max="4" readonly
+                                           class="h-10 w-20 text-center border-y border-gray-300 [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                    <button type="button" onclick="updateQuantity('couple', 1)"
+                                            class="bg-gray-200 text-gray-600 hover:bg-gray-300 h-10 w-10 rounded-r-lg flex items-center justify-center">
+                                        <span class="material-icons-outlined">add</span>
+                                    </button>
+                                    <span class="ml-3 text-gray-600">₹{{ event.couple_fee }} each</span>
+                                </div>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number *
+                                </label>
+                                <input type="tel" name="phone" id="phone" required pattern="[0-9]{10}"
+                                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                                       placeholder="Enter 10 digit mobile number"
+                                       minlength="10" maxlength="10">
+                                <p class="mt-1 text-sm text-gray-500">Required for booking confirmation</p>
+                            </div>
+
+                            <!-- Total Amount -->
+                            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">Total Amount:</span>
+                                    <span class="text-xl font-bold text-red-600" id="total_amount">₹0</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submit_button" disabled
+                                    class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Proceed to Payment
+                            </button>
+                        </form>
+
+                        <!-- Additional Info -->
+                        <div class="mt-6 text-sm text-gray-500">
+                            <p class="flex items-center mb-2">
+                                <span class="material-icons-outlined text-gray-400 mr-2">security</span>
+                                Secure payment powered by Razorpay
+                            </p>
+                            <p class="flex items-center">
+                                <span class="material-icons-outlined text-gray-400 mr-2">support_agent</span>
+                                24/7 customer support available
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this script at the end of the content block -->
+    <script>
+        const stagFee = {{ event.stag_fee }};
+        const coupleFee = {{ event.couple_fee }};
+        const maxSeats = {{ event.available_seats }};
+
+        function updateQuantity(type, change) {
+            const input = document.getElementById(`${type}_count`);
+            const currentValue = parseInt(input.value);
+            const newValue = Math.max(0, Math.min(4, currentValue + change));
+            
+            // Calculate total seats needed
+            const otherType = type === 'stag' ? 'couple' : 'stag';
+            const otherCount = parseInt(document.getElementById(`${otherType}_count`).value);
+            const totalSeats = (type === 'stag' ? newValue + (otherCount * 2) : (newValue * 2) + otherCount);
+            
+            // Check if we have enough seats available
+            if (totalSeats <= maxSeats) {
+                input.value = newValue;
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const stagCount = parseInt(document.getElementById('stag_count').value);
+            const coupleCount = parseInt(document.getElementById('couple_count').value);
+            const total = (stagCount * stagFee) + (coupleCount * coupleFee);
+            
+            document.getElementById('total_amount').textContent = `₹${total}`;
+            
+            // Enable/disable submit button based on selection
+            const submitButton = document.getElementById('submit_button');
+            submitButton.disabled = (stagCount === 0 && coupleCount === 0);
+        }
+    </script>
+{% endblock %} 
