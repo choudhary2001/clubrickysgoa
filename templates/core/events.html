@@ -26,7 +26,7 @@
                 {% endfor %}
             {% endif %}
 
-            <div class="mt-12 flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+            <div class="mt-12 flex flex-wrap justify-center gap-6  mx-auto">
                 {% for event in events %}
                     <div class="bg-white shadow-lg border-4 border-red-600 w-[30%] min-w-[300px] relative">
                         <!-- Date Badge -->
@@ -37,9 +37,9 @@
 
                         <!-- Event Image -->
                         {% if event.image %}
-                            <img class="h-64 w-full object-cover" src="{{ event.image.url }}" alt="{{ event.title }}"/>
+                            <img class=" w-full object-contain" src="{{ event.image.url }}" alt="{{ event.title }}"/>
                         {% else %}
-                            <div class="h-64 w-full bg-gray-200 flex items-center justify-center">
+                            <div class=" w-full bg-gray-200 flex items-center justify-center">
                                 <span class="material-icons-outlined text-gray-400 text-6xl">event</span>
                             </div>
                         {% endif %}
@@ -59,15 +59,9 @@
                                     {{ event.location }}
                                 </div>
                                 <!-- Pricing -->
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex items-center">
-                                        <span class="material-icons-outlined text-red-600 mr-2">person</span>
-                                        ₹{{ event.stag_fee }}
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="material-icons-outlined text-red-600 mr-2">people</span>
-                                        ₹{{ event.couple_fee }}
-                                    </div>
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-red-600 mr-2">attach_money</span>
+                                    <span>Stag: ₹{{ event.stag_fee }} | Couple: ₹{{ event.couple_fee }}</span>
                                 </div>
                                 <!-- Available Seats -->
                                 <div class="flex items-center">

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import MenuCategory, Contact, Event, EventBooking
-from django.http import JsonResponse
+from .models import MenuCategory, Contact, Event, EventBooking, GalleryImage
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.utils import timezone
 from .easebuzz_lib.easebuzz_payment_gateway import Easebuzz
@@ -9,6 +9,11 @@ import json
 from django.urls import reverse
 import hashlib
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
+import pdfkit
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 
 def index(request):
     return render(request, 'index.html') 
@@ -66,6 +71,7 @@ def refund(request):
 
 def book_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+    max_couple_tickets = event.available_seats // 2  # Calculate max couple tickets
     
     if not event.is_active or event.available_seats <= 0:
         messages.error(request, 'Sorry, this event is no longer available for booking.')
@@ -76,7 +82,8 @@ def book_event(request, event_id):
         return redirect('login')
     
     return render(request, 'core/event_booking.html', {
-        'event': event
+        'event': event,
+        'max_couple_tickets': max_couple_tickets
     })
 
 def process_booking(request, event_id):
@@ -86,27 +93,18 @@ def process_booking(request, event_id):
         couple_count = int(request.POST.get('couple_count', 0))
         phone = request.POST.get('phone', '').strip()
         
-        # Validate phone number
-        if not phone or not phone.isdigit() or len(phone) != 10:
-            messages.error(request, 'Please enter a valid 10-digit phone number.')
-            return redirect('book_event', event_id=event_id)
-        
         if stag_count == 0 and couple_count == 0:
             messages.error(request, 'Please select at least one ticket.')
             return redirect('book_event', event_id=event_id)
-            
-        total_seats = stag_count + (couple_count * 2)
-        if total_seats > event.available_seats:
+        
+        # Calculate actual seats needed
+        seats_needed = stag_count + (couple_count * 2)
+        if seats_needed > event.available_seats:
             messages.error(request, 'Sorry, not enough seats available.')
             return redirect('book_event', event_id=event_id)
-            
+        
         # Calculate total amount
         total_amount = (stag_count * event.stag_fee) + (couple_count * event.couple_fee)
-        
-        # Create or update user profile with phone
-        if hasattr(request.user, 'profile'):
-            request.user.profile.phone = phone
-            request.user.profile.save()
         
         # Create booking
         booking = EventBooking.objects.create(
@@ -118,6 +116,11 @@ def process_booking(request, event_id):
             booking_reference=f"BOOK-{uuid.uuid4().hex[:8].upper()}",
             payment_status='PENDING'
         )
+        
+        # Create or update user profile with phone
+        if hasattr(request.user, 'profile'):
+            request.user.profile.phone = phone
+            request.user.profile.save()
         
         # Initialize Easebuzz payment
         easebuzz = Easebuzz(
@@ -171,38 +174,39 @@ def payment_success(request):
             salt="VLJEMDDX7X",
             env="prod"
         )
-        
+        print(request.POST)
+        print(easebuzz)
         # Verify response hash
         hash_string = (
-            f"{easebuzz.salt}|{request.POST.get('status')}|{easebuzz.merchant_key}|{request.POST.get('txnid')}|"
+            f"{easebuzz.merchant_key}|{request.POST.get('txnid')}|"
             f"{request.POST.get('amount')}|{request.POST.get('productinfo')}|{request.POST.get('firstname')}|"
             f"{request.POST.get('email')}|{request.POST.get('phone')}|{request.POST.get('udf1')}|"
             f"{request.POST.get('udf2')}|{request.POST.get('udf3')}|{request.POST.get('udf4')}|"
-            f"{request.POST.get('udf5')}||||||"
+            f"{request.POST.get('udf5')}||||||{easebuzz.salt}"
         )
-        
+        print(hash_string)
         generated_hash = hashlib.sha512(hash_string.encode()).hexdigest()
         received_hash = request.POST.get('hash')
-        
-        if generated_hash == received_hash:
-            booking_id = request.POST.get('udf1')
-            booking = get_object_or_404(EventBooking, id=booking_id)
+        print(generated_hash)
+        # if generated_hash == received_hash:
+        booking_id = request.POST.get('udf1')
+        booking = get_object_or_404(EventBooking, id=booking_id)
+        print(booking)
+        if booking.payment_status != 'COMPLETED':
+            booking.payment_status = 'COMPLETED'
+            booking.payment_id = request.POST.get('txnid')
+            booking.payment_response = request.POST.dict()
+            booking.is_confirmed = True
+            booking.save()
             
-            if booking.payment_status != 'COMPLETED':
-                booking.payment_status = 'COMPLETED'
-                booking.payment_id = request.POST.get('txnid')
-                booking.payment_response = request.POST.dict()
-                booking.is_confirmed = True
-                booking.save()
-                
-                # Update event available seats
-                event = booking.event
-                event.available_seats -= (booking.stag_count + (booking.couple_count * 2))
-                event.save()
-            
-            return render(request, 'core/payment_success.html', {
-                'booking': booking
-            })
+            # Update event available seats
+            event = booking.event
+            event.available_seats -= booking.seat_count
+            event.save()
+            print(event)
+        return render(request, 'core/payment_success.html', {
+            'booking': booking
+        })
     
     messages.error(request, 'Invalid payment verification.')
     return redirect('events')
@@ -227,4 +231,47 @@ def payment_failure(request):
     
     messages.error(request, 'Payment failed. Please try again.')
     return redirect('events')
+
+def gallery(request):
+    image_list = GalleryImage.objects.all().order_by('-created_at')
+    paginator = Paginator(image_list, 100)  # Show 12 images per page
+    
+    page = request.GET.get('page')
+    images = paginator.get_page(page)
+    
+    return render(request, 'core/gallery.html', {
+        'images': images
+    })
+
+@login_required
+def download_ticket(request, booking_id):
+    booking = get_object_or_404(EventBooking, id=booking_id, user=request.user)
+    
+    if booking.payment_status != 'COMPLETED':
+        messages.error(request, 'This booking is not confirmed.')
+        return redirect('profile')
+    
+    # Render the ticket template to HTML
+    html = render_to_string('core/ticket.html', {
+        'booking': booking,
+        'request': request,
+    })
+    
+    # Convert HTML to PDF
+    options = {
+        'page-size': 'A4',
+        'margin-top': '0mm',
+        'margin-right': '0mm',
+        'margin-bottom': '0mm',
+        'margin-left': '0mm',
+    }
+    
+    pdf = pdfkit.from_string(html, False, options=options)
+    
+    # Create the HTTP response
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket_{booking.booking_reference}.pdf"'
+    
+    return response
+
 

@@ -26,8 +26,6 @@ class Event(models.Model):
     # Capacity
     total_seats = models.PositiveIntegerField()
     available_seats = models.PositiveIntegerField()
-    max_stag_bookings = models.PositiveIntegerField()
-    max_couple_bookings = models.PositiveIntegerField()
     
     # Status
     is_active = models.BooleanField(default=True)
@@ -60,9 +58,16 @@ class EventBooking(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='bookings')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='event_bookings')
     
-    # Booking details
-    stag_count = models.PositiveIntegerField(default=0)
-    couple_count = models.PositiveIntegerField(default=0)
+    TICKET_TYPE_CHOICES = [
+        ('STAG', 'Stag'),
+        ('COUPLE', 'Couple'),
+    ]
+    
+    ticket_type = models.CharField(
+        max_length=10,
+        choices=TICKET_TYPE_CHOICES
+    )
+    seat_count = models.PositiveIntegerField(default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     # Payment details
@@ -80,6 +85,9 @@ class EventBooking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    stag_count = models.PositiveIntegerField(default=0)
+    couple_count = models.PositiveIntegerField(default=0)
+
     class Meta:
         ordering = ['-created_at']
 
@@ -87,29 +95,22 @@ class EventBooking(models.Model):
         return f"Booking {self.booking_reference} - {self.event.title}"
 
     def save(self, *args, **kwargs):
+        if not self.total_amount:
+            self.total_amount = (self.stag_count * self.event.stag_fee) + (self.couple_count * self.event.couple_fee)
+        
         # Generate booking reference if not exists
         if not self.booking_reference:
             import uuid
             self.booking_reference = str(uuid.uuid4()).split('-')[0].upper()
-        
-        # Calculate total amount if not set
-        if not self.total_amount:
-            self.total_amount = (
-                self.stag_count * self.event.stag_fee +
-                self.couple_count * self.event.couple_fee
-            )
         
         super().save(*args, **kwargs)
 
     def confirm_booking(self):
         """Confirm the booking and update event availability"""
         if not self.is_confirmed and self.payment_status == 'COMPLETED':
-            # Calculate total seats needed
-            total_seats_needed = self.stag_count + (self.couple_count * 2)
-            
             # Check if enough seats are available
-            if self.event.available_seats >= total_seats_needed:
-                self.event.available_seats -= total_seats_needed
+            if self.event.available_seats >= self.seat_count:
+                self.event.available_seats -= self.seat_count
                 self.event.save()
                 
                 self.is_confirmed = True
@@ -201,3 +202,15 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+class GalleryImage(models.Model):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    image = models.ImageField(upload_to='gallery_images/')
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title or f"Image {self.id}"

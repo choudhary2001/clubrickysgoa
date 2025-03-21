@@ -8,21 +8,36 @@
     <div class="container mx-auto px-4">
         <div class="max-w-6xl mx-auto space-y-6">
             <!-- Profile Header -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                            <span class="material-icons-outlined text-3xl text-red-600">person</span>
+            <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <!-- User Info -->
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 w-full sm:w-auto">
+                        <!-- Avatar -->
+                        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="material-icons-outlined text-4xl text-red-600">person</span>
                         </div>
-                        <div>
+                        <!-- User Details -->
+                        <div class="text-center sm:text-left">
                             <h1 class="text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
                             <p class="text-gray-600">{{ user.email }}</p>
+                            {% if user.profile.phone %}
+                            <p class="text-gray-600 flex items-center justify-center sm:justify-start mt-1">
+                                <span class="material-icons-outlined text-gray-400 mr-1">phone</span>
+                                {{ user.profile.phone }}
+                            </p>
+                            {% endif %}
                         </div>
                     </div>
-                    <a href="{% url 'edit_profile' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <span class="material-icons-outlined mr-2">edit</span>
-                        Edit Profile
-                    </a>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap justify-center sm:justify-end gap-3 w-full sm:w-auto">
+                        <a href="{% url 'edit_profile' %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            <span class="material-icons-outlined mr-2">edit</span>
+                            Edit Profile
+                        </a>
+                     
+                    </div>
                 </div>
             </div>
 
@@ -52,6 +67,48 @@
                 </div>
             </div>
 
+                       <!-- Profile Stats -->
+                       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                        <!-- Total Bookings -->
+                        <div class="bg-white rounded-lg shadow-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Bookings</p>
+                                    <h3 class="text-2xl font-bold">{{ bookings.count }}</h3>
+                                </div>
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <span class="material-icons-outlined text-red-600">confirmation_number</span>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Upcoming Events -->
+                        <div class="bg-white rounded-lg shadow-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Upcoming Events</p>
+                                    <h3 class="text-2xl font-bold">{{ upcoming_events_count|default:"0" }}</h3>
+                                </div>
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <span class="material-icons-outlined text-red-600">event</span>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Total Spent -->
+                        <div class="bg-white rounded-lg shadow-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Spent</p>
+                                    <h3 class="text-2xl font-bold">₹{{ total_spent|default:"0" }}</h3>
+                                </div>
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <span class="material-icons-outlined text-red-600">payments</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
             <!-- My Bookings Section -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div class="border-b border-gray-200">
@@ -70,9 +127,9 @@
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                             <!-- Event Info -->
                             <div class="flex-1">
-                                <div class="flex items-start space-x-4">
+                                <div class="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
                                     <!-- Event Image -->
-                                    <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                    <div class="w-full sm:w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                                         {% if booking.event.image %}
                                             <img src="{{ booking.event.image.url }}" alt="{{ booking.event.title }}" 
                                                  class="w-full h-full object-cover">
@@ -84,7 +141,7 @@
                                     </div>
                                     
                                     <!-- Event Details -->
-                                    <div class="flex-1">
+                                    <div class="flex-1 w-full">
                                         <h3 class="text-lg font-semibold text-gray-900">{{ booking.event.title }}</h3>
                                         <div class="mt-1 space-y-1">
                                             <p class="text-sm text-gray-600 flex items-center">
@@ -101,8 +158,8 @@
                             </div>
 
                             <!-- Booking Details -->
-                            <div class="flex flex-col space-y-2 md:text-right">
-                                <div class="flex items-center justify-between md:justify-end md:space-x-4">
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between sm:justify-end sm:space-x-4">
                                     {% if booking.stag_count > 0 %}
                                     <span class="text-sm text-gray-600">{{ booking.stag_count }} Stag</span>
                                     {% endif %}
@@ -111,7 +168,7 @@
                                     {% endif %}
                                     <span class="font-semibold">₹{{ booking.total_amount }}</span>
                                 </div>
-                                <div class="flex items-center justify-between md:justify-end md:space-x-4">
+                                <div class="flex items-center justify-between sm:justify-end sm:space-x-4">
                                     <span class="text-xs text-gray-500">#{{ booking.booking_reference }}</span>
                                     {% if booking.payment_status == 'COMPLETED' %}
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -134,14 +191,16 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="mt-4 flex items-center justify-end space-x-3">
+                        <div class="mt-4 flex flex-wrap items-center justify-end gap-3">
                             {% if booking.payment_status == 'COMPLETED' %}
-                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <a href="{% url 'download_ticket' booking.id %}" 
+                                   class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                     <span class="material-icons-outlined text-base mr-1">download</span>
                                     Download Ticket
-                                </button>
+                                </a>
                             {% elif booking.payment_status == 'FAILED' %}
-                                <a href="{% url 'book_event' booking.event.id %}" class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <a href="{% url 'book_event' booking.event.id %}" 
+                                   class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                     <span class="material-icons-outlined text-base mr-1">refresh</span>
                                     Try Again
                                 </a>
@@ -164,6 +223,8 @@
                 </div>
                 {% endif %}
             </div>
+
+ 
         </div>
     </div>
 </div>

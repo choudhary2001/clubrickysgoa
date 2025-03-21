@@ -13,6 +13,7 @@ import uuid
 from .forms import CustomUserCreationForm, UserProfileForm, OTPVerificationForm
 from .models import CustomUser
 from core.models import EventBooking
+from django.db.models import Sum
 
 def register(request):
     if request.method == 'POST':
@@ -63,14 +64,24 @@ def verify_email(request, token):
     except CustomUser.DoesNotExist:
         return render(request, 'registration/verification_failed.html')
 
+
 @login_required
 def profile(request):
-    # Get user's bookings ordered by date
     bookings = EventBooking.objects.filter(user=request.user).order_by('-created_at')
-    print('bookings', bookings)
+    upcoming_events_count = bookings.filter(
+        event__date__gte=timezone.now().date(),
+        payment_status='COMPLETED'
+    ).count()
+    total_spent = bookings.filter(
+        payment_status='COMPLETED'
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    print(total_spent)
     return render(request, 'accounts/profile.html', {
-        'bookings': bookings
+        'bookings': bookings,
+        'upcoming_events_count': upcoming_events_count,
+        'total_spent': total_spent,
     })
+
 
 
 

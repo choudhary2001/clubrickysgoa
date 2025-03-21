@@ -15,4 +15,6 @@ urlpatterns = [
     path('events/<int:event_id>/process-booking/', views.process_booking, name='process_booking'),
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/failure/', views.payment_failure, name='payment_failure'),
+    path('gallery/', views.gallery, name='gallery'),
+    path('download-ticket/<int:booking_id>/', views.download_ticket, name='download_ticket'),
 ] 

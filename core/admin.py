@@ -3,7 +3,8 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
 from unfold.admin import ModelAdmin
-from .models import Event, EventBooking, Payment, MenuCategory, MenuItem, Contact
+from .models import Event, EventBooking, Payment, MenuCategory, MenuItem, Contact, GalleryImage
+from django import forms
 
 @admin.register(Event)
 class EventAdmin(ModelAdmin):
@@ -43,7 +44,6 @@ class EventAdmin(ModelAdmin):
                 "fields": [
                     ("stag_fee", "couple_fee"),
                     ("total_seats", "available_seats"),
-                    ("max_stag_bookings", "max_couple_bookings"),
                 ],
             },
         ),
@@ -82,68 +82,41 @@ class EventAdmin(ModelAdmin):
             '<span class="material-icons-outlined text-gray-400 mr-2">schedule</span>'
             '<span>{} - {}</span>'
             '</div>',
-            obj.start_time.strftime('%I:%M %p'),
-            obj.end_time.strftime('%I:%M %p')
+            obj.start_time.strftime("%I:%M %p"),
+            obj.end_time.strftime("%I:%M %p")
         )
     event_time.short_description = "Time"
 
     def seats_status(self, obj):
-        percentage = (obj.available_seats / obj.total_seats) * 100
-        if percentage > 60:
-            color_class = 'bg-green-100 text-green-800'
-            icon = 'check_circle'
-        elif percentage > 30:
-            color_class = 'bg-yellow-100 text-yellow-800'
-            icon = 'warning'
-        else:
-            color_class = 'bg-red-100 text-red-800'
-            icon = 'error'
-        
         return format_html(
             '<div class="flex items-center">'
-            '<span class="material-icons-outlined text-current mr-2">{}</span>'
-            '<span class="px-2 py-1 text-xs font-medium rounded-full {}">'
-            '{}/{}</span></div>',
-            icon, color_class, obj.available_seats, obj.total_seats
+            '<span class="material-icons-outlined text-gray-400 mr-2">event_seat</span>'
+            '<span>{} / {}</span>'
+            '</div>',
+            obj.available_seats,
+            obj.total_seats
         )
     seats_status.short_description = "Seats"
 
     def price_display(self, obj):
         return format_html(
-            '<div class="space-y-1">'
             '<div class="flex items-center">'
-            '<span class="material-icons-outlined text-gray-400 mr-2">person</span>'
-            '<span>Stag: ₹{}</span>'
-            '</div>'
-            '<div class="flex items-center">'
-            '<span class="material-icons-outlined text-gray-400 mr-2">people</span>'
-            '<span>Couple: ₹{}</span>'
-            '</div>'
+            '<span class="material-icons-outlined text-gray-400 mr-2">attach_money</span>'
+            '<span>Stag: ₹{} | Couple: ₹{}</span>'
             '</div>',
-            obj.stag_fee, obj.couple_fee
+            obj.stag_fee,
+            obj.couple_fee
         )
     price_display.short_description = "Pricing"
 
     def status_badge(self, obj):
-        if not obj.is_active:
-            badge_class = 'bg-red-100 text-red-800'
-            status = 'Inactive'
-            icon = 'cancel'
-        elif obj.date < timezone.now().date():
-            badge_class = 'bg-gray-100 text-gray-800'
-            status = 'Past'
-            icon = 'history'
-        else:
-            badge_class = 'bg-green-100 text-green-800'
-            status = 'Active'
-            icon = 'check_circle'
-        
+        status = "Active" if obj.is_active else "Inactive"
+        color = "green" if obj.is_active else "red"
         return format_html(
-            '<div class="flex items-center">'
-            '<span class="material-icons-outlined text-current mr-2">{}</span>'
-            '<span class="px-2 py-1 text-xs font-medium rounded-full {}">{}</span>'
-            '</div>',
-            icon, badge_class, status
+            '<span class="flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{}-100 text-{}-800" style="color:black;">'
+            '<span class="material-icons-outlined text-base mr-1">check_circle</span>{}'
+            '</span>',
+            color, color, status
         )
     status_badge.short_description = "Status"
 
@@ -255,7 +228,7 @@ class EventBookingAdmin(ModelAdmin):
         icon, badge_class = status_config.get(obj.payment_status, ('help', 'bg-gray-100 text-gray-800'))
         
         return format_html(
-            '<div class="flex items-center">'
+            '<div class="flex items-center" style="color:grey;">'
             '<span class="material-icons-outlined text-current mr-2">{}</span>'
             '<span class="px-2 py-1 text-xs font-medium rounded-full {}">{}</span>'
             '</div>',
@@ -274,7 +247,7 @@ class EventBookingAdmin(ModelAdmin):
             icon = 'pending'
         
         return format_html(
-            '<div class="flex items-center">'
+            '<div class="flex items-center" >'
             '<span class="material-icons-outlined text-current mr-2">{}</span>'
             '<span class="px-2 py-1 text-xs font-medium rounded-full {}">{}</span>'
             '</div>',
@@ -624,6 +597,151 @@ class ContactAdmin(ModelAdmin):
             obj.created_at.strftime("%d %b, %Y %I:%M %p")
         )
     contact_date.short_description = "Date"
+
+class GalleryImageForm(forms.ModelForm):
+    class Meta:
+        model = GalleryImage
+        fields = ['title', 'image', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'vTextField',
+                'style': 'width: 80%;',
+                'placeholder': 'Enter image title here...'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'vLargeTextField',
+                'style': 'width: 80%; height: 100px;',
+                'placeholder': 'Enter a brief description...'
+            }),
+            'image': forms.ClearableFileInput(attrs={
+                'class': 'vFileField',
+                'style': 'width: 80%;',
+            }),
+        }
+
+@admin.register(GalleryImage)
+class GalleryImageAdmin(ModelAdmin):
+    list_display = ('gallery_preview', 'gallery_info', 'gallery_date')
+    search_fields = ('title', 'description')
+    list_filter = ('created_at',)
+    ordering = ('-created_at',)
+    actions = ['delete_selected']
+    
+    fieldsets = [
+        (
+            "Gallery Information",
+            {
+                "fields": [
+                    "title",
+                    "description",
+                    "image",
+                ],
+            },
+        ),
+        (
+            "Preview",
+            {
+                "fields": ["image_preview_tag"],
+                "description": "Preview of the uploaded image",
+            },
+        ),
+        (
+            "System Fields",
+            {
+                "fields": ["created_at"],
+                "classes": ["collapse"],
+            },
+        ),
+    ]
+    
+    readonly_fields = ('created_at', 'image_preview_tag')
+
+    def gallery_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width: 100px; height: auto; border-radius: 4px; object-fit: cover;" />',
+                obj.image.url
+            )
+        return format_html(
+            '<div class="flex items-center justify-center bg-gray-100 rounded" style="width: 100px; height: 60px;">'
+            '<span class="material-icons-outlined text-gray-400">image_not_available</span>'
+            '</div>'
+        )
+    gallery_preview.short_description = "Preview"
+
+    def gallery_info(self, obj):
+        title = obj.title or "Untitled"
+        description = obj.description or "No description"
+        return format_html(
+            '<div class="flex flex-col">'
+            '<span class="font-medium">{}</span>'
+            '<span class="text-sm text-gray-500">{}</span>'
+            '</div>',
+            title,
+            description[:100] + '...' if len(description) > 100 else description
+        )
+    gallery_info.short_description = "Information"
+
+    def gallery_date(self, obj):
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">calendar_today</span>'
+            '{}'
+            '</div>',
+            obj.created_at.strftime("%d %b, %Y %I:%M %p")
+        )
+    gallery_date.short_description = "Added On"
+
+    def image_preview_tag(self, obj):
+        if obj.image:
+            return format_html(
+                '<div class="mt-2">'
+                '<img src="{}" style="max-width: 400px; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />'
+                '</div>',
+                obj.image.url
+            )
+        return format_html(
+            '<div class="flex items-center text-gray-400">'
+            '<span class="material-icons-outlined mr-2">image_not_available</span>'
+            '<span>No image uploaded</span>'
+            '</div>'
+        )
+    image_preview_tag.short_description = "Image Preview"
+
+    def delete_selected(self, request, queryset):
+        """Custom delete action that also removes image files"""
+        for obj in queryset:
+            # Delete the image file if it exists
+            if obj.image:
+                try:
+                    obj.image.delete(save=False)  # Delete the file but don't save the model yet
+                except Exception:
+                    pass  # Continue even if file deletion fails
+            obj.delete()  # Delete the model instance
+        
+        self.message_user(request, f"{len(queryset)} images have been deleted successfully.")
+    delete_selected.short_description = "Delete selected images"
+
+    def delete_model(self, request, obj):
+        """Override delete_model to ensure image file is deleted"""
+        if obj.image:
+            try:
+                obj.image.delete(save=False)
+            except Exception:
+                pass
+        obj.delete()
+
+    def save_model(self, request, obj, form, change):
+        """Override save_model to handle image replacement"""
+        if change and 'image' in form.changed_data:
+            # If we're changing the image, delete the old one
+            try:
+                old_obj = self.model.objects.get(pk=obj.pk)
+                if old_obj.image:
+                    old_obj.image.delete(save=False)
+            except Exception:
+                pass
+        super().save_model(request, obj, form, change)
 
 # Customize admin site header and title
 admin.site.site_header = "Club Ricky's Goa Administration"

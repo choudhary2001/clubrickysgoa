@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gallery - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-r from-red-600 to-black">
+    <div class="relative h-[40vh] flex items-center justify-center">
+        <div class="text-center">
+            <h1 class="text-6xl font-bold text-white mb-4">Our Gallery</h1>
+            <p class="text-xl text-gray-200">Experience the Vibe Through Our Lens</p>
+        </div>
+    </div>
+</div>
+
+<!-- Content Section -->
+<div class="bg-white">
+    <div class="container mx-auto mt-12">
+        <!-- Gallery Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {% for image in images %}
+            <div class="gallery-item group relative cursor-pointer aspect-square overflow-hidden" onclick="openViewer('{{ image.image.url }}', {{ forloop.counter0 }})">
+                <img src="{{ image.image.url }}" 
+                     alt="{{ image.title }}" 
+                     class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
+                     loading="lazy">
+                
+                <!-- Hover Overlay -->
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            {% empty %}
+            <div class="col-span-full flex flex-col items-center justify-center py-16">
+                <span class="material-icons-outlined text-6xl mb-4 text-red-600">photo_library</span>
+                <p class="text-xl text-gray-600">No images available in the gallery</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if images.has_other_pages %}
+        <div class="py-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if images.has_previous %}
+                <a href="?page={{ images.previous_page_number }}" 
+                   class="px-6 py-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    Previous
+                </a>
+                {% endif %}
+                
+                <span class="px-6 py-3 text-sm font-medium text-white bg-black rounded-lg">
+                    {{ images.number }} / {{ images.paginator.num_pages }}
+                </span>
+                
+                {% if images.has_next %}
+                <a href="?page={{ images.next_page_number }}" 
+                   class="px-6 py-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    Next
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+        <!-- Stats Section -->
+        <div class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-red-600 mb-2">500+</div>
+                <div class="text-gray-600">Happy Moments Captured</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-red-600 mb-2">50+</div>
+                <div class="text-gray-600">Events Covered</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-red-600 mb-2">1000+</div>
+                <div class="text-gray-600">Smiling Faces</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Image Viewer -->
+<div id="gallery-viewer" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[9999]">
+    <!-- Close Button -->
+    <button id="close-viewer" class="absolute top-6 right-6 text-white hover:text-red-500 transition-colors z-[9999]" onclick="closeViewer()">
+        <span class="material-icons-outlined text-4xl">close</span>
+    </button>
+    
+    <!-- Navigation Buttons -->
+    <button id="prev-image" class="absolute left-6 top-1/2 -translate-y-1/2 text-white hover:text-red-500 transition-colors z-[9999]" onclick="showPrevImage()">
+        <span class="material-icons-outlined text-6xl">chevron_left</span>
+    </button>
+    <button id="next-image" class="absolute right-6 top-1/2 -translate-y-1/2 text-white hover:text-red-500 transition-colors z-[9999]" onclick="showNextImage()">
+        <span class="material-icons-outlined text-6xl">chevron_right</span>
+    </button>
+
+    <!-- Current Image -->
+    <div class="w-full h-full flex items-center justify-center p-4">
+        <img id="current-image" class="max-h-[90vh] max-w-[90vw] object-contain" src="" alt="">
+    </div>
+</div>
+
+<script>
+let currentIndex = 0;
+const imageUrls = [
+    {% for image in images %}
+        "{{ image.image.url }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+function openViewer(imageUrl, index) {
+    currentIndex = index;
+    const viewer = document.getElementById('gallery-viewer');
+    const currentImage = document.getElementById('current-image');
+    
+    currentImage.src = imageUrl;
+    viewer.classList.remove('hidden');
+    viewer.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    updateNavigationButtons();
+}
+
+function closeViewer() {
+    const viewer = document.getElementById('gallery-viewer');
+    viewer.classList.add('hidden');
+    viewer.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+function showPrevImage() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        document.getElementById('current-image').src = imageUrls[currentIndex];
+        updateNavigationButtons();
+    }
+}
+
+function showNextImage() {
+    if (currentIndex < imageUrls.length - 1) {
+        currentIndex++;
+        document.getElementById('current-image').src = imageUrls[currentIndex];
+        updateNavigationButtons();
+    }
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-image');
+    const nextBtn = document.getElementById('next-image');
+    
+    prevBtn.style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+    nextBtn.style.visibility = currentIndex < imageUrls.length - 1 ? 'visible' : 'hidden';
+}
+
+// Close on click outside
+document.getElementById('gallery-viewer').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeViewer();
+    }
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('gallery-viewer').classList.contains('hidden')) return;
+    
+    switch(e.key) {
+        case 'ArrowLeft':
+            showPrevImage();
+            break;
+        case 'ArrowRight':
+            showNextImage();
+            break;
+        case 'Escape':
+            closeViewer();
+            break;
+    }
+});
+</script>
+{% endblock %} 

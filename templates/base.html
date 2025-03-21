@@ -58,10 +58,10 @@
             <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center gap-8">
                 <a href="{% url 'home' %}" class="text-white hover:text-gray-200">Home</a>
-                <a href="/about" class="text-white hover:text-gray-200">About Us</a>
-                <a href="/events" class="text-white hover:text-gray-200">Events</a>
-                <a href="/menu" class="text-white hover:text-gray-200">Menu</a>
-                <a href="/contact" class="text-white hover:text-gray-200">Contact Us</a>
+                <a href="{% url 'about' %}" class="text-white hover:text-gray-200">Vibe</a>
+                <a href="{% url 'events' %}" class="text-white hover:text-gray-200">Bookings</a>
+                <a href="{% url 'gallery' %}" class="text-white hover:text-gray-200">Past Events</a>
+                <a href="{% url 'contact' %}" class="text-white hover:text-gray-200">Locate</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'profile' %}" class="text-white hover:text-gray-200">Profile</a>
                     <form method="post" action="{% url 'logout' %}" class="inline">
@@ -76,7 +76,7 @@
 
             <!-- Book Button (Always Visible) -->
             <a href="/events" class="hidden md:block bg-white text-[#C4302B] px-4 py-2 rounded-full hover:bg-gray-100">
-                Book a Table
+                Book Now
             </a>
 
             <!-- Mobile Menu Button -->
@@ -88,10 +88,11 @@
         <!-- Mobile Navigation (Hidden by Default) -->
         <nav id="mobile-menu" class="hidden absolute top-30 left-0 w-full bg-[#C4302B] text-white text-center p-4 space-y-4 md:hidden z-999" style="z-index: 9999;">
             <a href="{% url 'home' %}" class="block hover:text-gray-200">Home</a>
-            <a href="/about" class="block hover:text-gray-200">About Us</a>
-            <a href="/events" class="block hover:text-gray-200">Events</a>
-            <a href="/menu" class="block hover:text-gray-200">Menu</a>
-            <a href="/contact" class="block hover:text-gray-200">Contact Us</a>
+            <a href="/about" class="block hover:text-gray-200">Vibe</a>
+            <a href="/events" class="block hover:text-gray-200">Bookings</a>
+            <!-- <a href="/menu" class="block hover:text-gray-200">Menu</a> -->
+            <a href="{% url 'gallery' %}" class="block hover:text-gray-200">Past Events</a>
+            <a href="/contact" class="block hover:text-gray-200">Locate</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'profile' %}" class="block hover:text-gray-200">Profile</a>
                 <form method="post" action="{% url 'logout' %}" class="block">
@@ -103,7 +104,7 @@
                 <a href="{% url 'register' %}" class="block hover:text-gray-200">Register</a>
             {% endif %}
             <button class="bg-white text-[#C4302B] px-4 py-2 rounded-full hover:bg-gray-100 w-full">
-                Book a Table
+                Book Now
             </button>
         </nav>
     </header>
@@ -132,10 +133,10 @@
             <nav class="flex flex-col space-y-2 text-center md:text-left">
                 <h2 class="font-bold text-xl" >Navigate</h2>
                 <a href="{% url 'home' %}" class="block hover:text-gray-300">Home</a>
-                <a href="/about" class="block hover:text-gray-300">About Us</a>
-                <a href="/events" class="block hover:text-gray-300">Events</a>
-                <a href="/menu" class="block hover:text-gray-300">Menu</a>
-                <a href="/contact" class="block hover:text-gray-300">Contact Us</a>
+                <a href="/about" class="block hover:text-gray-300">Vibe</a>
+                <a href="/events" class="block hover:text-gray-300">Bookings</a>
+                <a href="/gallery" class="block hover:text-gray-300">Past Events</a>
+                <a href="/contact" class="block hover:text-gray-300">Locate</a>
             </nav>
         </div>
         

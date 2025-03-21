@@ -154,9 +154,9 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 EMAIL_USE_TLS = False
-EMAIL_HOST_USER = 'danielmagnuspl@gmail.com'
-EMAIL_HOST_PASSWORD = 'dcar lnyh cddr nzrx'
-DEFAULT_FROM_EMAIL = 'danielmagnuspl@gmail.com'
+EMAIL_HOST_USER = 'booking.rickysclub@gmail.com'
+EMAIL_HOST_PASSWORD = 'jucv phbf wvro monq'
+DEFAULT_FROM_EMAIL = 'booking.rickysclub@gmail.com'
 # Authentication settings
 LOGIN_REDIRECT_URL = 'profile'
 LOGOUT_REDIRECT_URL = 'login'

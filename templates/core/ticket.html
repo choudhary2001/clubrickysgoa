@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Event Ticket - {{ booking.event.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .ticket {
+            border: 2px solid #C4302B;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .event-details {
+            margin-bottom: 20px;
+        }
+        .booking-details {
+            margin-bottom: 20px;
+        }
+        .qr-code {
+            text-align: center;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="header">
+            <img src="{{ request.scheme }}://{{ request.get_host }}/media/logo-1.png" alt="Logo" class="logo">
+            <h1>{{ booking.event.title }}</h1>
+        </div>
+        
+        <div class="event-details">
+            <h2>Event Details</h2>
+            <p><strong>Date:</strong> {{ booking.event.date|date:"D, d M Y" }}</p>
+            <p><strong>Time:</strong> {{ booking.event.start_time|time:"g:i A" }}</p>
+            <p><strong>Location:</strong> {{ booking.event.location }}</p>
+        </div>
+        
+        <div class="booking-details">
+            <h2>Booking Details</h2>
+            <p><strong>Booking Reference:</strong> {{ booking.booking_reference }}</p>
+            <p><strong>Name:</strong> {{ booking.user.get_full_name }}</p>
+            {% if booking.stag_count > 0 %}
+            <p><strong>Stag Tickets:</strong> {{ booking.stag_count }}</p>
+            {% endif %}
+            {% if booking.couple_count > 0 %}
+            <p><strong>Couple Tickets:</strong> {{ booking.couple_count }}</p>
+            {% endif %}
+        </div>
+        
+        <!-- <div class="qr-code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ booking.booking_reference }}" 
+                 alt="QR Code">
+        </div> -->
+    </div>
+</body>
+</html> 
