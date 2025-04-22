@@ -14,69 +14,54 @@
     </div>
 </div>
 
-<!-- Content Section -->
-<div class="bg-white">
-    <div class="container mx-auto mt-12">
-        <!-- Gallery Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {% for image in images %}
-            <div class="gallery-item group relative cursor-pointer aspect-square overflow-hidden" onclick="openViewer('{{ image.image.url }}', {{ forloop.counter0 }})">
-                <img src="{{ image.image.url }}" 
-                     alt="{{ image.title }}" 
-                     class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
-                     loading="lazy">
-                
-                <!-- Hover Overlay -->
-                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            {% empty %}
-            <div class="col-span-full flex flex-col items-center justify-center py-16">
-                <span class="material-icons-outlined text-6xl mb-4 text-red-600">photo_library</span>
-                <p class="text-xl text-gray-600">No images available in the gallery</p>
-            </div>
+<!-- Category Navigation -->
+<div class="bg-white sticky top-0 z-40 shadow-sm">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-start space-x-4 overflow-x-auto py-4 scrollbar-hide">
+            <button class="category-filter px-6 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if not selected_category %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}"
+                    data-category="all">
+                All Photos
+            </button>
+            {% for category in categories %}
+            <button class="category-filter px-6 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap {% if selected_category == category.id %}bg-red-600 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}"
+                    data-category="{{ category.id }}">
+                {{ category.name }}
+            </button>
             {% endfor %}
         </div>
+    </div>
+</div>
 
-        <!-- Pagination -->
-        {% if images.has_other_pages %}
-        <div class="py-8 flex justify-center">
-            <nav class="flex items-center space-x-2">
-                {% if images.has_previous %}
-                <a href="?page={{ images.previous_page_number }}" 
-                   class="px-6 py-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
-                    Previous
-                </a>
+<!-- Gallery Categories -->
+<div class="bg-white py-12">
+    <div class="container mx-auto px-4">
+        {% for category in categories %}
+        <div class="gallery-category mb-16" data-category="{{ category.id }}">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ category.name }}</h2>
+                {% if category.description %}
+                <p class="text-gray-600">{{ category.description }}</p>
                 {% endif %}
-                
-                <span class="px-6 py-3 text-sm font-medium text-white bg-black rounded-lg">
-                    {{ images.number }} / {{ images.paginator.num_pages }}
-                </span>
-                
-                {% if images.has_next %}
-                <a href="?page={{ images.next_page_number }}" 
-                   class="px-6 py-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
-                    Next
-                </a>
-                {% endif %}
-            </nav>
-        </div>
-        {% endif %}
-
-        <!-- Stats Section -->
-        <div class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-                <div class="text-4xl font-bold text-red-600 mb-2">500+</div>
-                <div class="text-gray-600">Happy Moments Captured</div>
             </div>
-            <div class="text-center">
-                <div class="text-4xl font-bold text-red-600 mb-2">50+</div>
-                <div class="text-gray-600">Events Covered</div>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl font-bold text-red-600 mb-2">1000+</div>
-                <div class="text-gray-600">Smiling Faces</div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {% for image in category.galleryimage_set.all %}
+                <div class="gallery-item group relative cursor-pointer aspect-square overflow-hidden rounded-lg"
+                     onclick="openViewer('{{ image.image.url }}', {{ forloop.counter0 }})">
+                    <img src="{{ image.image.url }}" 
+                         alt="{{ image.title }}" 
+                         class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
+                         loading="lazy">
+                    
+                    <!-- Hover Overlay -->
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <span class="material-icons-outlined text-white text-3xl">zoom_in</span>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -176,5 +161,49 @@ document.addEventListener('keydown', function(e) {
             break;
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.category-filter');
+    const categories = document.querySelectorAll('.gallery-category');
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const categoryId = button.dataset.category;
+            
+            // Update button styles
+            categoryButtons.forEach(btn => {
+                btn.classList.remove('bg-red-600', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            button.classList.remove('bg-gray-100', 'text-gray-700');
+            button.classList.add('bg-red-600', 'text-white');
+            
+            // Show/hide categories
+            if (categoryId === 'all') {
+                categories.forEach(category => {
+                    category.style.display = 'block';
+                });
+            } else {
+                categories.forEach(category => {
+                    if (category.dataset.category === categoryId) {
+                        category.style.display = 'block';
+                    } else {
+                        category.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+});
 </script>
+
+<style>
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>
 {% endblock %} 

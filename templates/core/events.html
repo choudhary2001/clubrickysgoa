@@ -1,97 +1,667 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Events - Club Ricky's Goa{% endblock %}
 
 {% block content %}
     <!-- Hero Section -->
-    <section class="relative min-h-[650px] flex items-center justify-center text-center px-4 md:px-8">
-        <!-- Background Image -->
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-60.jpg');"></div>
-        <div class="absolute inset-0 bg-black/50"></div>
-
-        <!-- Content -->
-        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
-            <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">Upcoming Events</h1>
+<section class="relative py-20 bg-gray-900">
+    <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('/media/events-bg.jpg');"></div>
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Events Calendar</h1>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">Discover and book our upcoming events, featuring top DJs, themed parties, and exclusive experiences.</p>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Events Section -->
-    <section class="py-16">
-        <div class="container mx-auto">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-4 p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-lg">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <div class="mt-12 flex flex-wrap justify-center gap-6  mx-auto">
-                {% for event in events %}
-                    <div class="bg-white shadow-lg border-4 border-red-600 w-[30%] min-w-[300px] relative">
-                        <!-- Date Badge -->
-                        <div class="absolute -top-4 left-4 bg-red-700 text-white px-4 py-2 rounded-b-md text-center font-bold">
-                            <span class="block text-lg">{{ event.date|date:"d" }}</span>
-                            <span class="block text-sm">{{ event.date|date:"M" }}</span>
-                        </div>
-
-                        <!-- Event Image -->
-                        {% if event.image %}
-                            <img class=" w-full object-contain" src="{{ event.image.url }}" alt="{{ event.title }}"/>
-                        {% else %}
-                            <div class=" w-full bg-gray-200 flex items-center justify-center">
-                                <span class="material-icons-outlined text-gray-400 text-6xl">event</span>
-                            </div>
-                        {% endif %}
-
-                        <!-- Event Details -->
-                        <div class="p-6">
-                            <h3 class="font-bold text-lg">{{ event.title }}</h3>
-                            <div class="mt-2 space-y-2 text-gray-600 text-sm">
-                                <!-- Time -->
-                                <div class="flex items-center">
-                                    <span class="material-icons-outlined text-red-600 mr-2">schedule</span>
-                                    {{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}
-                                </div>
-                                <!-- Location -->
-                                <div class="flex items-center">
-                                    <span class="material-icons-outlined text-red-600 mr-2">location_on</span>
-                                    {{ event.location }}
-                                </div>
-                                <!-- Pricing -->
-                                <div class="flex items-center">
-                                    <span class="material-icons-outlined text-red-600 mr-2">attach_money</span>
-                                    <span>Stag: ₹{{ event.stag_fee }} | Couple: ₹{{ event.couple_fee }}</span>
-                                </div>
-                                <!-- Available Seats -->
-                                <div class="flex items-center">
-                                    <span class="material-icons-outlined text-red-600 mr-2">event_seat</span>
-                                    {{ event.available_seats }} seats available
-                                </div>
-                            </div>
-
-                            {% if event.is_active and event.available_seats > 0 %}
-                                <form method="post" action="{% url 'book_event' event.id %}" class="mt-4">
-                                    {% csrf_token %}
-                                    <button type="submit" class="w-full bg-red-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-800 transition">
-                                        Book Now
-                                    </button>
-                                </form>
-                            {% else %}
-                                <button disabled class="w-full bg-gray-400 text-white font-bold py-2 px-6 rounded-lg mt-4 cursor-not-allowed">
-                                    {% if not event.is_active %}Event Closed{% else %}Sold Out{% endif %}
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="text-center text-gray-600 py-8">
-                        <span class="material-icons-outlined text-6xl mb-4">event_busy</span>
-                        <p class="text-xl">No upcoming events at the moment.</p>
-                        <p class="mt-2">Please check back later for new events!</p>
-                    </div>
-                {% endfor %}
+<!-- Calendar Navigation -->
+<section class="py-8 bg-white border-b">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <button id="prev-month" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h2 id="current-month" class="text-2xl font-bold text-gray-900"></h2>
+                <button id="next-month" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex space-x-2">
+                <button id="month-view" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-medium">Month</button>
+                <button id="list-view" class="px-4 py-2 bg-red-600 text-white rounded-md font-medium">List</button>
             </div>
         </div>
+        </div>
     </section>
+
+<!-- Calendar Month View (Hidden by Default) -->
+<section id="calendar-month-view" class="py-12 bg-gray-50 hidden">
+    <div class="container mx-auto px-4">
+        <!-- Days of Week Header -->
+        <div class="grid grid-cols-7 gap-2 mb-4 text-center">
+            <div class="font-semibold text-gray-700">Sun</div>
+            <div class="font-semibold text-gray-700">Mon</div>
+            <div class="font-semibold text-gray-700">Tue</div>
+            <div class="font-semibold text-gray-700">Wed</div>
+            <div class="font-semibold text-gray-700">Thu</div>
+            <div class="font-semibold text-gray-700">Fri</div>
+            <div class="font-semibold text-gray-700">Sat</div>
+                    </div>
+        
+        <!-- Calendar Grid -->
+        <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+            <!-- Calendar days will be dynamically generated here -->
+                    </div>
+                </div>
+</section>
+
+<!-- Calendar List View (Shown by Default) -->
+<section id="calendar-list-view" class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div id="events-list" class="space-y-6">
+            <!-- Events list will be dynamically generated here -->
+                    </div>
+                </div>
+</section>
+
+<!-- Event Details Modal -->
+<div id="event-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-image" class="w-full h-64 bg-gray-200 rounded-lg mb-4 overflow-hidden">
+                <!-- Event image will be placed here -->
+                    </div>
+            <div class="flex items-center mb-4 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span id="modal-date"></span>
+                    </div>
+            <div class="flex items-center mb-4 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span id="modal-time"></span>
+                </div>
+                <div class="prose max-w-none">  
+                    <p id="modal-description" class="text-gray-700 mb-6 whitespace-pre-line"></p>
+                </div>
+            
+            <!-- Pricing Section -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-3 text-gray-900">Entry Options</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-semibold">Stag Entry</h5>
+                            <span id="modal-stag-fee" class="font-bold text-red-600"></span>
+                    </div>
+                        <p class="text-sm text-gray-600">Single entry ticket for one person</p>
+                </div>
+    
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-semibold">Couple Entry</h5>
+                            <span id="modal-couple-fee" class="font-bold text-red-600"></span>
+                    </div>
+                        <p class="text-sm text-gray-600">Entry ticket for a couple (2 people)</p>
+                    </div>
+                    </div>
+                </div>
+    
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="text-gray-700 font-medium">Available Seats:</span>
+                    <span id="modal-available-seats" class="font-semibold ml-2"></span>
+                </div>
+                <a id="modal-book-button" href="#" class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition duration-300">
+                    Book Now
+                </a>
+            </div>
+                    </div>
+                    </div>
+                </div>
+    
+<!-- Places to Visit Section -->
+<section class="py-16 bg-white border-t border-gray-200">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900">10 Places To Visit in Baga & Goa</h2>
+            <p class="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+                While you're soaking up the good vibes at Club Ricky's in Baga, don't miss out on everything this vibrant part of Goa has to offer. From golden beaches and buzzing markets to tranquil churches and thrilling adventures—Baga and its surroundings are packed with experiences waiting to be explored.
+            </p>
+        </div>
+        
+        <div class="space-y-16 max-w-5xl mx-auto">
+            <!-- Place 1 -->
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1560179406-1c6c60e0dc76?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QmFnYSUyMEJlYWNofGVufDB8fDB8fHwy" alt="Baga Beach" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">01</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Baga Beach</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Just a short walk away from Club Ricky's, this iconic beach is perfect for water sports, beachside shacks, sunset strolls, and that perfect Goa selfie.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 2 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="/media/images(9).jpeg" alt="Saturday Night Market" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">02</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Saturday Night Market – Arpora</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Live music, funky fashion, food from around the world, and a vibe that screams Goa—this market lights up every Saturday night and is just a few minutes from Baga.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 3 -->
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://media-cdn.tripadvisor.com/media/photo-s/19/8b/62/51/titos-lane-adjacent-to.jpg" alt="Tito's Lane" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">03</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Tito's Lane</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Famous for its nightlife, clubs, and buzzing energy, Tito's Lane is the party heart of Baga. Whether you're into dancing all night or bar-hopping, this is where the magic happens.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 4 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://cdn.abhibus.com/2024/06/Anjuna-Flea-Market-North-Goa.jpg" alt="Anjuna Flea Market" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">04</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Anjuna Flea Market</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        A paradise for shopaholics and boho souls, this legendary Wednesday market offers everything from handmade jewelry to hippie fashion.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 5 -->
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://www.susegadsuitesgoa.com/wp-content/uploads/2023/04/calangute-02-jpg.webp" alt="Calangute Beach" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">05</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Calangute Beach</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Neighboring Baga, Calangute is Goa's largest beach, bustling with parasailing, banana boat rides, jet-skiing, and shacks serving delicious seafood and cold drinks.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 6 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://www.fabhotels.com/blog/wp-content/uploads/2022/01/Chapora-fort_709883707-600X400.jpg" alt="Chapora Fort" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">06</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Chapora Fort</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Feel the history and soak in panoramic views of the Arabian Sea. This fort is also famous for its Bollywood connection (hello, Dil Chahta Hai moment!).
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 7 -->
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://makeithappen.co.in/wp-content/uploads/2022/08/mae-de-deus-church-saligao-1024x585.jpg" alt="Saligao Church" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">07</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Saligao Church</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        A stunning piece of Gothic architecture nestled amidst greenery. Perfect for a peaceful break from the buzz of Baga.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 8 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://media.tacdn.com/media/attractions-splice-spp-674x446/11/fd/99/4e.jpg" alt="Dolphin Watching Tours" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">08</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Dolphin Watching Tours</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Hop on a boat from Baga or SinQ Beach and spot playful dolphins along the coastline—an experience that's hard to forget.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 9 -->
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="https://www.snowparkgoa.com/wp-content/uploads/2018/07/Snow-Volley-Ball.jpg" alt="Snow Park Goa" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">09</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Snow Park Goa</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        Cool off from the Goan sun with snowball fights, ice slides, and frozen fun—right in Baga! It's quirky, fun, and great for all ages.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Place 10 -->
+            <div class="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div class="md:w-1/2">
+                    <img src="/media/0F9A1587.jpg" alt="Club Ricky's Poolside Chill" class="rounded-lg shadow-lg w-full h-80 object-cover">
+                </div>
+                <div class="md:w-1/2">
+                    <div class="border-l-4 border-red-600 pl-4 mb-4">
+                        <span class="text-red-600 font-bold">10</span>
+                        <h3 class="text-2xl font-bold text-gray-900">Club Ricky's Poolside Chill</h3>
+                    </div>
+                    <p class="text-gray-700">
+                        And of course, no visit to Baga is complete without a splash at Club Ricky's. Dive in, sip on a cocktail, groove to the tunes, and let the good times roll!
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-16 bg-gray-100 p-8 rounded-xl">
+            <p class="text-xl text-gray-700">
+                📍Located in the heart of Baga, Club Ricky's is your go-to pool club for daytime chilling and nighttime thrills. Make it your base, and explore all that Goa has to offer—one unforgettable moment at a time.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Emergency Contact Information -->
+<section class="py-12 bg-red-600 text-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold">Emergency Contact Information</h2>
+            <p class="mt-2 text-lg text-white/80">Keep these numbers handy during your stay in Goa</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-center mb-2">Police</h3>
+                <div class="space-y-2">
+                    <p class="text-center font-medium">Emergency: 100</p>
+                    <p class="text-center">Baga Police Station: 0832-2277249</p>
+                    <p class="text-center">Tourist Police: 0832-2428383</p>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-center mb-2">Medical</h3>
+                <div class="space-y-2">
+                    <p class="text-center font-medium">Ambulance: 108</p>
+                    <p class="text-center">North Goa District Hospital: 0832-2257220</p>
+                    <p class="text-center">Healthway Hospital: 0832-2464643</p>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-center mb-2">Other Emergency</h3>
+                <div class="space-y-2">
+                    <p class="text-center font-medium">Fire: 101</p>
+                    <p class="text-center">Coast Guard: 1554</p>
+                    <p class="text-center">Tourist Helpline: 1800-332-3999</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8">
+            <p class="text-white/80">
+                For any assistance at Club Ricky's, please call: <span class="font-bold">+91 98765 43210</span>
+            </p>
+        </div>
+    </div>
+</section>
+    
+<!-- JavaScript for Calendar Functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get events data from Django template
+        const events = [
+            {% for event in events %}
+            {
+                id: {{ event.id }},
+                title: "{{ event.title }}",
+                date: "{{ event.date|date:'Y-m-d' }}",
+                time: "{{ event.start_time }} - {{ event.end_time }}",
+                description: "{{ event.description|escapejs }}",
+                image: "{{ event.image.url }}",
+                stagFee: {{ event.stag_fee }},
+                coupleFee: {{ event.couple_fee }},
+                availableSeats: {{ event.available_seats }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        
+        // Initialize calendar
+        updateCalendarHeader();
+        renderCalendar();
+        renderEventsList();
+        
+        // Event listeners for navigation
+        document.getElementById('prev-month').addEventListener('click', function() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateCalendarHeader();
+            renderCalendar();
+            renderEventsList();
+        });
+        
+        document.getElementById('next-month').addEventListener('click', function() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendarHeader();
+            renderCalendar();
+            renderEventsList();
+        });
+        
+        // Event listeners for view switching
+        document.getElementById('month-view').addEventListener('click', function() {
+            document.getElementById('month-view').classList.remove('bg-gray-200', 'text-gray-700');
+            document.getElementById('month-view').classList.add('bg-red-600', 'text-white');
+            document.getElementById('list-view').classList.remove('bg-red-600', 'text-white');
+            document.getElementById('list-view').classList.add('bg-gray-200', 'text-gray-700');
+            document.getElementById('calendar-month-view').classList.remove('hidden');
+            document.getElementById('calendar-list-view').classList.add('hidden');
+        });
+        
+        document.getElementById('list-view').addEventListener('click', function() {
+            document.getElementById('list-view').classList.remove('bg-gray-200', 'text-gray-700');
+            document.getElementById('list-view').classList.add('bg-red-600', 'text-white');
+            document.getElementById('month-view').classList.remove('bg-red-600', 'text-white');
+            document.getElementById('month-view').classList.add('bg-gray-200', 'text-gray-700');
+            document.getElementById('calendar-list-view').classList.remove('hidden');
+            document.getElementById('calendar-month-view').classList.add('hidden');
+        });
+        
+        // Event listener for modal close button
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('event-modal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('event-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+        
+        function updateCalendarHeader() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+        
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+            
+            // Get first day of month (0 = Sunday, 1 = Monday, etc.)
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            
+            // Get number of days in month
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Get events for current month
+            const monthEvents = events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+            });
+            
+            // Create event map by day
+            const eventsByDay = {};
+            monthEvents.forEach(event => {
+                const day = new Date(event.date).getDate();
+                if (!eventsByDay[day]) {
+                    eventsByDay[day] = [];
+                }
+                eventsByDay[day].push(event);
+            });
+            
+            // Previous month's days
+            const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = prevMonthDays - i;
+                const dayElement = createDayElement(day, 'prev-month');
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Current month's days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayEvents = eventsByDay[i] || [];
+                const dayElement = createDayElement(i, 'current-month', dayEvents);
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Calculate total cells needed (7x6 grid)
+            const totalCells = 42;
+            const remainingCells = totalCells - (firstDay + daysInMonth);
+            
+            // Next month's days
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayElement = createDayElement(i, 'next-month');
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        function createDayElement(day, monthClass, dayEvents = []) {
+            const dayElement = document.createElement('div');
+            dayElement.className = `min-h-[100px] p-2 border rounded-lg ${
+                monthClass === 'current-month' ? 'bg-white' : 'bg-gray-100 text-gray-400'
+            }`;
+            
+            // Day number
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'text-right font-medium';
+            dayNumber.textContent = day;
+            dayElement.appendChild(dayNumber);
+            
+            // Add events for this day
+            if (dayEvents && dayEvents.length > 0) {
+                const eventsContainer = document.createElement('div');
+                eventsContainer.className = 'mt-2 space-y-1';
+                
+                dayEvents.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'bg-red-100 text-red-800 p-1 rounded text-xs truncate cursor-pointer hover:bg-red-200 transition-colors';
+                    eventElement.textContent = event.title;
+                    eventElement.addEventListener('click', () => showEventDetails(event));
+                    eventsContainer.appendChild(eventElement);
+                });
+                
+                dayElement.appendChild(eventsContainer);
+            }
+            
+            return dayElement;
+        }
+
+        function renderEventsList() {
+            const eventsListContainer = document.getElementById('events-list');
+            eventsListContainer.innerHTML = '';
+            
+            // Filter events for current month
+            const monthEvents = events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+            });
+            
+            // Sort events by date
+            monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (monthEvents.length === 0) {
+                const noEventsElement = document.createElement('div');
+                noEventsElement.className = 'text-center py-8 text-gray-500';
+                noEventsElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="text-xl font-semibold mb-2">No Events This Month</h3>
+                    <p>Check back soon for upcoming events or browse other months.</p>
+                `;
+                eventsListContainer.appendChild(noEventsElement);
+                return;
+            }
+            
+            // Group events by date
+            const eventsByDate = {};
+            monthEvents.forEach(event => {
+                if (!eventsByDate[event.date]) {
+                    eventsByDate[event.date] = [];
+                }
+                eventsByDate[event.date].push(event);
+            });
+            
+            // Create list items for each date
+            Object.keys(eventsByDate).sort().forEach(date => {
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'flex items-center mb-3';
+                dateHeader.innerHTML = `
+                    <div class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center mr-4">
+                        <span class="font-bold">${dateObj.getDate()}</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">${formattedDate}</h3>
+                `;
+                eventsListContainer.appendChild(dateHeader);
+                
+                const eventsForDate = eventsByDate[date];
+                eventsForDate.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'bg-white rounded-lg shadow-md overflow-hidden ml-16 mb-6 hover:shadow-lg transition-shadow cursor-pointer';
+                    eventElement.innerHTML = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/4 h-48 md:h-auto bg-gray-200">
+                                <img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-6 md:w-3/4">
+                                <h4 class="text-xl font-bold text-gray-900 mb-2">${event.title}</h4>
+                                <div class="flex items-center mb-2 text-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    ${event.time}
+                    </div>
+                                <p class="text-gray-600 mb-4 line-clamp-2">${event.description}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-red-600 font-bold">From ₹${event.stagFee}</span>
+                                    <button class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-full transition-colors">
+                                        View Details
+                                    </button>
+                </div>
+            </div>
+        </div>
+                    `;
+                    eventElement.addEventListener('click', () => showEventDetails(event));
+                    eventsListContainer.appendChild(eventElement);
+                });
+            });
+        }
+
+        function showEventDetails(event) {
+            // Populate modal with event details
+            document.getElementById('modal-title').textContent = event.title;
+            document.getElementById('modal-date').textContent = formatDate(event.date);
+            document.getElementById('modal-time').textContent = event.time;
+            document.getElementById('modal-description').textContent = event.description;
+            document.getElementById('modal-stag-fee').textContent = `₹${event.stagFee}`;
+            document.getElementById('modal-couple-fee').textContent = `₹${event.coupleFee}`;
+            document.getElementById('modal-available-seats').textContent = event.availableSeats;
+            
+            // Set image
+            const modalImage = document.getElementById('modal-image');
+            modalImage.innerHTML = `<img src="${event.image}" alt="${event.title}" class="w-full h-full object-cover">`;
+            
+            // Set book button link
+            document.getElementById('modal-book-button').href = `/events/${event.id}/book/`;
+            
+            // Show modal
+            document.getElementById('event-modal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function formatDate(dateString) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+    });
+</script>
 {% endblock %}

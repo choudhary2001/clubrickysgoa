@@ -1,8 +1,13 @@
 from django.urls import path
+from django.http import Http404
 from . import views
 
+def test_404(request):
+    raise Http404("Test 404 page")
+
 urlpatterns = [
-    path('', views.index, name='index'),
+    # path('', views.index, name='index'),
+    path('', views.home, name='index'),
     path('home/', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('events/', views.events, name='events'),
@@ -17,4 +22,7 @@ urlpatterns = [
     path('payment/failure/', views.payment_failure, name='payment_failure'),
     path('gallery/', views.gallery, name='gallery'),
     path('download-ticket/<int:booking_id>/', views.download_ticket, name='download_ticket'),
+    path('test-404/', views.test_404_view, name='test_404'),
+    path('food-menu/', views.food_menu, name='food_menu'),
+    path('bar-menu/', views.bar_menu, name='bar_menu'),
 ] 

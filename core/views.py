@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import MenuCategory, Contact, Event, EventBooking, GalleryImage
+from .models import MenuCategory, Contact, Event, EventBooking, GalleryImage, GalleryImageCategory, TeamCategory, TeamMember, JobApplication
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -14,20 +14,69 @@ from django.template.loader import render_to_string
 import pdfkit
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.http import Http404
 
 def index(request):
     return render(request, 'index.html') 
 
 def home(request):
-    return render(request, 'core/home.html') 
+    # Get upcoming events
+    upcoming_events = Event.objects.filter(
+        date__gte=timezone.now().date(),
+        is_active=True
+    ).order_by('date')[:3]
+    
+    # Get gallery images for preview
+    gallery_images = GalleryImage.objects.all()[:8]
+    
+    return render(request, 'core/home.html', {
+        'upcoming_events': upcoming_events,
+        'gallery_images': gallery_images,
+    })
 
 def about(request):
-    return render(request, 'core/about.html') 
+    # Handle job application form submission
+    if request.method == 'POST':
+        try:
+            full_name = request.POST.get('full-name')
+            email = request.POST.get('email')
+            phone = request.POST.get('phone')
+            position = request.POST.get('position')
+            experience = request.POST.get('experience')
+            message = request.POST.get('message')
+            resume = request.FILES.get('resume')
+            
+            # Create job application
+            JobApplication.objects.create(
+                full_name=full_name,
+                email=email,
+                phone=phone,
+                position=position,
+                experience=experience,
+                message=message,
+                resume=resume
+            )
+            
+            messages.success(request, 'Your application has been submitted successfully! We will review it and contact you soon.')
+            return redirect('about')
+        except Exception as e:
+            messages.error(request, f'There was an error submitting your application. Please try again. Error: {str(e)}')
+            return redirect('about')
+    
+    team_categories = TeamCategory.objects.filter(is_active=True).prefetch_related(
+        'members'
+    ).order_by('order', 'name')
+    print(team_categories)
+
+    return render(request, 'core/about.html', {
+        'team_categories': team_categories,
+    })
 
 def events(request):
     # Get all active events that haven't ended yet
     events = Event.objects.filter(
-        is_active=True
+        is_active=True,
+        date__gte=timezone.now().date()
     ).order_by('date', 'start_time')
     
     return render(request, 'core/events.html', {
@@ -114,7 +163,8 @@ def process_booking(request, event_id):
             couple_count=couple_count,
             total_amount=total_amount,
             booking_reference=f"BOOK-{uuid.uuid4().hex[:8].upper()}",
-            payment_status='PENDING'
+            payment_status='PENDING',
+            phone_number=phone
         )
         
         # Create or update user profile with phone
@@ -198,10 +248,20 @@ def payment_success(request):
             booking.payment_response = request.POST.dict()
             booking.is_confirmed = True
             booking.save()
-            
+
+            payment = Payment.objects.create(
+                booking=booking,
+                payment_method='Easebuzz',
+                amount=booking.total_amount,
+                transaction_id=request.POST.get('txnid'),
+                payment_status='COMPLETED',
+                payment_response=request.POST.dict()
+            )
+            payment.save()
             # Update event available seats
             event = booking.event
-            event.available_seats -= booking.seat_count
+            event.available_seats -= booking.stag_count
+            event.available_seats -= 2 *booking.couple_count
             event.save()
             print(event)
         return render(request, 'core/payment_success.html', {
@@ -233,15 +293,14 @@ def payment_failure(request):
     return redirect('events')
 
 def gallery(request):
-    image_list = GalleryImage.objects.all().order_by('-created_at')
-    paginator = Paginator(image_list, 100)  # Show 12 images per page
+    categories = GalleryImageCategory.objects.filter(is_active=True)
+    selected_category = request.GET.get('category')
     
-    page = request.GET.get('page')
-    images = paginator.get_page(page)
-    
-    return render(request, 'core/gallery.html', {
-        'images': images
-    })
+    context = {
+        'categories': categories,
+        'selected_category': int(selected_category) if selected_category and selected_category.isdigit() else None
+    }
+    return render(request, 'core/gallery.html', context)
 
 @login_required
 def download_ticket(request, booking_id):
@@ -274,4 +333,14 @@ def download_ticket(request, booking_id):
     
     return response
 
+def test_404_view(request):
+    # Force a 404 response even when DEBUG is True
+    return render(request, '404.html', status=404)
+
+
+def food_menu(request):
+    return render(request, 'core/food_menu.html')
+
+def bar_menu(request):
+    return render(request, 'core/bar_menu.html')
 

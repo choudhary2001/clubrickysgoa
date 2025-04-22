@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
 from unfold.admin import ModelAdmin
-from .models import Event, EventBooking, Payment, MenuCategory, MenuItem, Contact, GalleryImage
+from .models import Event, EventBooking, Payment, MenuCategory, MenuItem, Contact, GalleryImage, GalleryImageCategory, TeamCategory, TeamMember, JobApplication
 from django import forms
 
 @admin.register(Event)
@@ -621,28 +621,23 @@ class GalleryImageForm(forms.ModelForm):
 
 @admin.register(GalleryImage)
 class GalleryImageAdmin(ModelAdmin):
-    list_display = ('gallery_preview', 'gallery_info', 'gallery_date')
+    list_display = ('gallery_preview', 'gallery_info', 'gallery_date', 'category_display')
+    list_filter = ('category', 'created_at')
     search_fields = ('title', 'description')
-    list_filter = ('created_at',)
     ordering = ('-created_at',)
     actions = ['delete_selected']
     
     fieldsets = [
         (
-            "Gallery Information",
+            "Image Information",
             {
                 "fields": [
                     "title",
                     "description",
+                    "category",
                     "image",
+                    "image_preview_tag",
                 ],
-            },
-        ),
-        (
-            "Preview",
-            {
-                "fields": ["image_preview_tag"],
-                "description": "Preview of the uploaded image",
             },
         ),
         (
@@ -655,6 +650,23 @@ class GalleryImageAdmin(ModelAdmin):
     ]
     
     readonly_fields = ('created_at', 'image_preview_tag')
+
+    def category_display(self, obj):
+        if obj.category:
+            return format_html(
+                '<div class="flex items-center">'
+                '<span class="material-icons-outlined text-gray-400 mr-2">folder</span>'
+                '<span>{}</span>'
+                '</div>',
+                obj.category.name
+            )
+        return format_html(
+            '<div class="flex items-center text-gray-400">'
+            '<span class="material-icons-outlined mr-2">folder_off</span>'
+            '<span>No Category</span>'
+            '</div>'
+        )
+    category_display.short_description = "Category"
 
     def gallery_preview(self, obj):
         if obj.image:
@@ -743,7 +755,345 @@ class GalleryImageAdmin(ModelAdmin):
                 pass
         super().save_model(request, obj, form, change)
 
+@admin.register(GalleryImageCategory)
+class GalleryImageCategoryAdmin(ModelAdmin):
+    list_display = ('name', 'image_count_display', 'status_badge', 'order', 'updated_at_display')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'description')
+    ordering = ('order', 'name')
+
+    fieldsets = [
+        (
+            "Category Information",
+            {
+                "fields": [
+                    "name",
+                    "description",
+                    "is_active",
+                ],
+            },
+        ),
+        (
+            "Display Settings",
+            {
+                "fields": [
+                    "order",
+                ],
+            },
+        ),
+    ]
+
+    def image_count_display(self, obj):
+        count = obj.image_count()
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">photo_library</span>'
+            '<span class="text-sm">{} images</span>'
+            '</div>',
+            count
+        )
+    image_count_display.short_description = "Images"
+
+    def status_badge(self, obj):
+        if obj.is_active:
+            badge_class = 'bg-green-100 text-green-800'
+            status = 'Active'
+            icon = 'check_circle'
+        else:
+            badge_class = 'bg-red-100 text-red-800'
+            status = 'Inactive'
+            icon = 'cancel'
+        
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-current mr-2">{}</span>'
+            '<span class="px-2 py-1 text-xs font-medium rounded-full {}">{}</span>'
+            '</div>',
+            icon, badge_class, status
+        )
+    status_badge.short_description = "Status"
+
+    def updated_at_display(self, obj):
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">update</span>'
+            '<span class="text-sm">{}</span>'
+            '</div>',
+            obj.updated_at.strftime("%d %b, %Y %I:%M %p")
+        )
+    updated_at_display.short_description = "Last Updated"
+
 # Customize admin site header and title
 admin.site.site_header = "Club Ricky's Goa Administration"
 admin.site.site_title = "Club Ricky's Goa Admin Portal"
 admin.site.index_title = "Welcome to Club Ricky's Goa Admin Portal"
+
+class TeamMemberAdmin(ModelAdmin):
+    list_display = ('name', 'position', 'category_badge', 'status_badge', 'order', 'updated_at_display')
+    list_filter = ('category', 'is_active', 'created_at')
+    search_fields = ('name', 'position', 'bio')
+    ordering = ('category', 'order', 'name')
+
+    fieldsets = [
+        (
+            "Member Information",
+            {
+                "fields": [
+                    "name",
+                    "position",
+                    "bio",
+                    "category",
+                    "image",
+                    "image_preview_tag",
+                ],
+            },
+        ),
+        (
+            "Settings",
+            {
+                "fields": [
+                    "order",
+                    "is_active",
+                ],
+            },
+        ),
+        (
+            "System Fields",
+            {
+                "fields": ["created_at", "updated_at"],
+                "classes": ["collapse"],
+            },
+        ),
+    ]
+    
+    readonly_fields = ('created_at', 'updated_at', 'image_preview_tag')
+
+    def category_badge(self, obj):
+        return format_html(
+            '<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">'
+            '{}'
+            '</span>',
+            obj.category.name
+        )
+    category_badge.short_description = "Category"
+
+    def status_badge(self, obj):
+        status = "Active" if obj.is_active else "Inactive"
+        color = "green" if obj.is_active else "red"
+        return format_html(
+            '<span class="px-2 py-1 text-xs font-medium rounded-full bg-{}-100 text-{}-800">'
+            '{}'
+            '</span>',
+            color, color, status
+        )
+    status_badge.short_description = "Status"
+
+    def updated_at_display(self, obj):
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">schedule</span>'
+            '<span>{}</span>'
+            '</div>',
+            obj.updated_at.strftime("%d %b, %Y %H:%M")
+        )
+    updated_at_display.short_description = "Last Updated"
+
+    def image_preview_tag(self, obj):
+        if obj.image:
+            return format_html(
+                '<div style="max-width: 300px; max-height: 300px; overflow: hidden;">'
+                '<img src="{}" style="width: 100%; height: auto; object-fit: cover;" />'
+                '</div>',
+                obj.image.url
+            )
+        return "No image available"
+    image_preview_tag.short_description = "Image Preview"
+
+class TeamCategoryAdmin(ModelAdmin):
+    list_display = ('name', 'member_count_display', 'status_badge', 'order', 'updated_at_display')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'description')
+    ordering = ('order', 'name')
+
+    fieldsets = [
+        (
+            "Category Information",
+            {
+                "fields": [
+                    "name",
+                    "description",
+                ],
+            },
+        ),
+        (
+            "Settings",
+            {
+                "fields": [
+                    "order",
+                    "is_active",
+                ],
+            },
+        ),
+        (
+            "System Fields",
+            {
+                "fields": ["created_at", "updated_at"],
+                "classes": ["collapse"],
+            },
+        ),
+    ]
+    
+    readonly_fields = ('created_at', 'updated_at')
+
+    def member_count_display(self, obj):
+        count = obj.member_count()
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">people</span>'
+            '<span>{} member{}</span>'
+            '</div>',
+            count, 's' if count != 1 else ''
+        )
+    member_count_display.short_description = "Members"
+
+    def status_badge(self, obj):
+        status = "Active" if obj.is_active else "Inactive"
+        color = "green" if obj.is_active else "red"
+        return format_html(
+            '<span class="px-2 py-1 text-xs font-medium rounded-full bg-{}-100 text-{}-800">'
+            '{}'
+            '</span>',
+            color, color, status
+        )
+    status_badge.short_description = "Status"
+
+    def updated_at_display(self, obj):
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">schedule</span>'
+            '<span>{}</span>'
+            '</div>',
+            obj.updated_at.strftime("%d %b, %Y %H:%M")
+        )
+    updated_at_display.short_description = "Last Updated"
+
+class JobApplicationAdmin(ModelAdmin):
+    list_display = ('applicant_info', 'position_display', 'status_badge', 'resume_link', 'application_date')
+    list_filter = ('position', 'status', 'created_at')
+    search_fields = ('full_name', 'email', 'phone', 'experience', 'message')
+    ordering = ('-created_at',)
+
+    fieldsets = [
+        (
+            "Applicant Information",
+            {
+                "fields": [
+                    "full_name",
+                    "email",
+                    "phone",
+                    "position",
+                    "status",
+                ],
+            },
+        ),
+        (
+            "Application Details",
+            {
+                "fields": [
+                    "experience",
+                    "message",
+                    "resume",
+                ],
+            },
+        ),
+        (
+            "System Fields",
+            {
+                "fields": ["created_at", "updated_at"],
+                "classes": ["collapse"],
+            },
+        ),
+    ]
+    
+    readonly_fields = ('created_at', 'updated_at')
+    actions = ["mark_under_review", "mark_for_interview", "mark_hired", "mark_rejected"]
+
+    @admin.action(description="Mark selected applications as Under Review")
+    def mark_under_review(self, request, queryset):
+        queryset.update(status='under_review')
+
+    @admin.action(description="Mark selected applications for Interview")
+    def mark_for_interview(self, request, queryset):
+        queryset.update(status='interview')
+
+    @admin.action(description="Mark selected applications as Hired")
+    def mark_hired(self, request, queryset):
+        queryset.update(status='hired')
+
+    @admin.action(description="Mark selected applications as Rejected")
+    def mark_rejected(self, request, queryset):
+        queryset.update(status='rejected')
+
+    def applicant_info(self, obj):
+        return format_html(
+            '<div class="flex flex-col">'
+            '<span class="font-medium">{}</span>'
+            '<span class="text-sm text-gray-500">{}</span>'
+            '<span class="text-sm text-gray-500">{}</span>'
+            '</div>',
+            obj.full_name,
+            obj.email,
+            obj.phone
+        )
+    applicant_info.short_description = "Applicant"
+
+    def position_display(self, obj):
+        return format_html(
+            '<span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">'
+            '{}'
+            '</span>',
+            obj.get_position_display()
+        )
+    position_display.short_description = "Position"
+
+    def status_badge(self, obj):
+        colors = {
+            'new': 'blue',
+            'under_review': 'yellow',
+            'interview': 'purple',
+            'hired': 'green',
+            'rejected': 'red',
+        }
+        color = colors.get(obj.status, 'gray')
+        return format_html(
+            '<span class="px-2 py-1 text-xs font-medium rounded-full bg-{}-100 text-{}-800 text-black">'
+            '{}'
+            '</span>',
+            color, color, obj.get_status_display()
+        )
+    status_badge.short_description = "Status"
+
+    def resume_link(self, obj):
+        if obj.resume:
+            return format_html(
+                '<a href="{}" class="text-blue-600 hover:underline" target="_blank">'
+                '<span class="material-icons-outlined">description</span> View Resume'
+                '</a>',
+                obj.resume.url
+            )
+        return "No resume"
+    resume_link.short_description = "Resume"
+
+    def application_date(self, obj):
+        return format_html(
+            '<div class="flex items-center">'
+            '<span class="material-icons-outlined text-gray-400 mr-2">event</span>'
+            '<span>{}</span>'
+            '</div>',
+            obj.created_at.strftime("%d %b, %Y %H:%M")
+        )
+    application_date.short_description = "Applied On"
+
+admin.site.register(TeamCategory, TeamCategoryAdmin)
+admin.site.register(TeamMember, TeamMemberAdmin)
+admin.site.register(JobApplication, JobApplicationAdmin)

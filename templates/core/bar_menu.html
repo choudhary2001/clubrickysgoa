@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[650px] flex items-center justify-center text-center px-4 md:px-8">
+        <!-- Background Image -->
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/media/FL-27.jpg');"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-4 w-full max-w-[1149px] flex flex-col items-center">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-wider text-white">MENU</h1>
+        </div>
+    </section>
+
+
+    <div class="container mx-auto py-12 px-6">
+
+        <img src="/media/BarMenu1.png" alt="Food Menu" class="w-full h-auto mb-4">
+        <img src="/media/BarMenu2.png" alt="Food Menu" class="w-full h-auto">
+    </div>
+
+{% endblock %}

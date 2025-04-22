@@ -88,6 +88,9 @@ class EventBooking(models.Model):
     stag_count = models.PositiveIntegerField(default=0)
     couple_count = models.PositiveIntegerField(default=0)
 
+    phone_number = models.CharField(max_length=15, blank=True)
+
+
     class Meta:
         ordering = ['-created_at']
 
@@ -120,8 +123,7 @@ class EventBooking(models.Model):
 
 class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
-        ('RAZORPAY', 'Razorpay'),
-        ('STRIPE', 'Stripe'),
+        ('Easebuzz', 'Easebuzz'),
         # Add other payment methods as needed
     ]
 
@@ -203,7 +205,31 @@ class Contact(models.Model):
     def __str__(self):
         return f"{self.name} - {self.email}"
 
+class GalleryImageCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Gallery Categories"
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+
+    def image_count(self):
+        return self.galleryimage_set.count()
+
 class GalleryImage(models.Model):
+    category = models.ForeignKey(
+        GalleryImageCategory, 
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     title = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to='gallery_images/')
     description = models.TextField(blank=True, null=True)
@@ -214,3 +240,79 @@ class GalleryImage(models.Model):
 
     def __str__(self):
         return self.title or f"Image {self.id}"
+
+class TeamCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Team Categories"
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+        
+    def member_count(self):
+        return self.members.count()
+
+class TeamMember(models.Model):
+    category = models.ForeignKey(
+        TeamCategory, 
+        on_delete=models.CASCADE,
+        related_name='members'
+    )
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
+    bio = models.TextField()
+    image = models.ImageField(upload_to='team_members/')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['category', 'order', 'name']
+
+    def __str__(self):
+        return f"{self.name} - {self.position}"
+
+class JobApplication(models.Model):
+    POSITION_CHOICES = [
+        ('bartender', 'Bartender'),
+        ('server', 'Server'),
+        ('chef', 'Chef'),
+        ('kitchen-staff', 'Kitchen Staff'),
+        ('dj', 'DJ'),
+        ('security', 'Security'),
+        ('management', 'Management'),
+        ('other', 'Other'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('under_review', 'Under Review'),
+        ('interview', 'Interview Scheduled'),
+        ('hired', 'Hired'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    position = models.CharField(max_length=20, choices=POSITION_CHOICES)
+    experience = models.TextField()
+    message = models.TextField()
+    resume = models.FileField(upload_to='resumes/', blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.full_name} - {self.get_position_display()}"

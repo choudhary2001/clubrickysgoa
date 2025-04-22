@@ -5,29 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Club Ricky's Goa{% endblock %}</title>
+    <!-- Favicon and App Icons -->
+    <link rel="icon" href="/media/logo-1.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/media/logo-1.png" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/logo-1.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/logo-1.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/media/logo-1.pngg">
+    <link rel="manifest" href="/media/site.webmanifest">
+    <meta name="theme-color" content="#C4302B">
+    <!-- Stylesheets -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
-        .font-serif {
-            font-family: 'Playfair Display', serif;
+        body {
+            font-family: 'Poppins', sans-serif;
         }
-        .font-sans {
-            font-family: 'Inter', sans-serif;
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
         }
-    </style>
-    <style>
-        @font-face {
-            font-family: 'Helvetica';
-            src: url('path-to-your-helvetica-font.woff2') format('woff2'),
-                    url('path-to-your-helvetica-font.woff') format('woff');
-            font-weight: 700;
-            font-display: swap;
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #C4302B;
+            transition: width 0.3s ease;
         }
-    </style>
-    <style>
-        /* Add this to your existing styles */
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .mobile-menu-transition {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
         .logout-button {
             background: none;
             border: none;
@@ -36,80 +56,109 @@
             font: inherit;
             color: inherit;
         }
-        
-        .logout-button:hover {
-            color: rgba(229, 231, 235, var(--tw-text-opacity));
-        }
     </style>
 </head>
-<body>
-    <!-- Header -->
-    <header class="bg-[#C4302B] py-4">
-        <div class="container mx-auto px-4 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="w-32 h-24 overflow-hidden">
-                <a href="{% url 'home' %}" class="block relative w-full h-full">
-                    <div class="absolute inset-0 bg-[url('/media/logo-1.png')] bg-contain bg-no-repeat bg-center
-                                transition-transform duration-300 hover:scale-110">
+<body class="bg-gray-50">
+    <!-- Modern Navigation Bar -->
+    <header class="bg-[#C4302B] shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto">
+            <!-- Desktop & Mobile Navigation Container -->
+            <div class="flex items-center justify-between px-4 py-3 lg:py-4">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center mr-8">
+                        <img src="/media/logo-1.png" alt="Club Ricky's Goa" class="h-24 w-auto">
+                    </a>
+                    <div class="hidden lg:flex items-center space-x-6 ml-8">
+                        {% if user.is_authenticated %}
+                            <div class="relative group">
+                                <button class="flex items-center text-white font-medium">
+                                    <span>My Account</span>
+                                    <span class="material-icons-outlined text-sm ml-1">expand_more</span>
+                                </button>
+                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                                    <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
-                </a>
+                </div>
+                
+                <!-- Desktop Navigation Links - Updated menu items -->
+                <nav class="hidden lg:flex items-center space-x-8">
+                    <a href="{% url 'home' %}" class="nav-link text-white font-medium">Home</a>
+                    <a href="{% url 'about' %}" class="nav-link text-white font-medium">Our Vibe</a>
+                    <a href="{% url 'events' %}" class="nav-link text-white font-medium">To-do</a>
+                    <a href="{% url 'gallery' %}" class="nav-link text-white font-medium">Events</a>
+                    <a href="{% url 'contact' %}" class="nav-link text-white font-medium">Locate</a>
+                </nav>
+                
+                <!-- Desktop Auth & Book Now -->
+                <div class="hidden lg:flex items-center space-x-6">
+                    {% if user.is_authenticated %}
+                        <!-- <div class="relative group">
+                            <button class="flex items-center text-white font-medium">
+                                <span>My Account</span>
+                                <span class="material-icons-outlined text-sm ml-1">expand_more</span>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                                <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                                </form>
+                            </div>
+                        </div> -->
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-white font-medium">Login</a>
+                        <a href="{% url 'register' %}" class="text-white font-medium">Register</a>
+                    {% endif %}
+                    
+                    <a href="/events" class="bg-white text-[#C4302B] px-5 py-2 rounded-full font-medium transition-colors duration-300">
+                        Book Now
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="lg:hidden flex items-center text-white focus:outline-none">
+                    <span class="material-icons-outlined text-2xl">menu</span>
+                </button>
             </div>
-
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center gap-8">
-                <a href="{% url 'home' %}" class="text-white hover:text-gray-200">Home</a>
-                <a href="{% url 'about' %}" class="text-white hover:text-gray-200">Vibe</a>
-                <a href="{% url 'events' %}" class="text-white hover:text-gray-200">Bookings</a>
-                <a href="{% url 'gallery' %}" class="text-white hover:text-gray-200">Past Events</a>
-                <a href="{% url 'contact' %}" class="text-white hover:text-gray-200">Locate</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'profile' %}" class="text-white hover:text-gray-200">Profile</a>
-                    <form method="post" action="{% url 'logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-button text-white hover:text-gray-200">Logout</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}" class="text-white hover:text-gray-200">Login</a>
-                    <a href="{% url 'register' %}" class="text-white hover:text-gray-200">Register</a>
-                {% endif %}
-            </nav>
-
-            <!-- Book Button (Always Visible) -->
-            <a href="/events" class="hidden md:block bg-white text-[#C4302B] px-4 py-2 rounded-full hover:bg-gray-100">
-                Book Now
-            </a>
-
-            <!-- Mobile Menu Button -->
-            <button id="menu-btn" class="md:hidden text-white focus:outline-none">
-                <i class="fas fa-bars text-3xl"></i> <!-- FontAwesome Icon -->
-            </button>
+            
+            <!-- Mobile Menu (Hidden by Default) - Updated menu items -->
+            <div id="mobile-menu" class="lg:hidden hidden bg-[#C4302B] border-t border-gray-100 mobile-menu-transition">
+                <div class="px-4 py-3 space-y-3">
+                    <a href="{% url 'home' %}" class="block py-2 text-white font-medium">Home</a>
+                    <a href="{% url 'about' %}" class="block py-2 text-white font-medium">Our Vibe</a>
+                    <a href="{% url 'events' %}" class="block py-2 text-white font-medium">To-do</a>
+                    <a href="{% url 'gallery' %}" class="block py-2 text-white font-medium">Events</a>
+                    <a href="{% url 'contact' %}" class="block py-2 text-white font-medium">Locate</a>
+                    
+                    <div class="border-t border-gray-100 pt-3"> 
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'profile' %}" class="block py-2 text-white font-medium">My Profile</a>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full text-left block py-2 text-white font-medium">Logout</button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="block py-2 text-white font-medium">Login</a>
+                            <a href="{% url 'register' %}" class="block py-2 text-white font-medium">Register</a>
+                        {% endif %}
+                        
+                        <a href="/events" class="block mt-3 bg-white text-[#C4302B] px-4 py-2 rounded-full font-medium text-center transition-colors duration-300">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- Mobile Navigation (Hidden by Default) -->
-        <nav id="mobile-menu" class="hidden absolute top-30 left-0 w-full bg-[#C4302B] text-white text-center p-4 space-y-4 md:hidden z-999" style="z-index: 9999;">
-            <a href="{% url 'home' %}" class="block hover:text-gray-200">Home</a>
-            <a href="/about" class="block hover:text-gray-200">Vibe</a>
-            <a href="/events" class="block hover:text-gray-200">Bookings</a>
-            <!-- <a href="/menu" class="block hover:text-gray-200">Menu</a> -->
-            <a href="{% url 'gallery' %}" class="block hover:text-gray-200">Past Events</a>
-            <a href="/contact" class="block hover:text-gray-200">Locate</a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'profile' %}" class="block hover:text-gray-200">Profile</a>
-                <form method="post" action="{% url 'logout' %}" class="block">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-button w-full text-left px-4 py-2 hover:text-gray-200">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="block hover:text-gray-200">Login</a>
-                <a href="{% url 'register' %}" class="block hover:text-gray-200">Register</a>
-            {% endif %}
-            <button class="bg-white text-[#C4302B] px-4 py-2 rounded-full hover:bg-gray-100 w-full">
-                Book Now
-            </button>
-        </nav>
     </header>
 
-    <!-- Remove the old navigation bar since we've integrated its functionality into the header -->
     {% if messages %}
     <div class="container mx-auto px-4 mt-4">
         {% for message in messages %}
@@ -122,55 +171,95 @@
     {% block content %}
     {% endblock %}
 
+    <!-- Footer with updated menu structure -->
     <footer class="text-white bg-[#C4302B] py-10 px-8 flex flex-col md:flex-row justify-between items-start space-y-6 md:space-y-0">
-        <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6 w-full md:w-auto">
+        <!-- Footer Menu 1 -->
+        <div class="flex flex-col items-center md:items-start space-y-4 w-full md:w-auto">
             <div class="w-48 h-24 overflow-hidden">
                 <a href="/" class="block relative w-full h-full">
                     <div class="absolute inset-0 bg-[url('/media/logo-1.png')] bg-contain bg-no-repeat bg-center 
                                 transition-transform duration-300 hover:scale-110 origin-center"></div>
                 </a>
             </div>
+        </div>
+        <!-- Footer Menu 1 -->
+        <div class="flex flex-col items-center md:items-start space-y-4 w-full md:w-auto">
+            <!-- <h2 class="font-bold text-xl">Navigate</h2> -->
             <nav class="flex flex-col space-y-2 text-center md:text-left">
-                <h2 class="font-bold text-xl" >Navigate</h2>
                 <a href="{% url 'home' %}" class="block hover:text-gray-300">Home</a>
-                <a href="/about" class="block hover:text-gray-300">Vibe</a>
-                <a href="/events" class="block hover:text-gray-300">Bookings</a>
-                <a href="/gallery" class="block hover:text-gray-300">Past Events</a>
-                <a href="/contact" class="block hover:text-gray-300">Locate</a>
+                <a href="{% url 'about' %}" class="block hover:text-gray-300">Our Vibe</a>
+                <a href="{% url 'gallery' %}" class="block hover:text-gray-300">Events</a>
+                <a href="{% url 'events' %}" class="block hover:text-gray-300">To-Do</a>
+                <a href="{% url 'contact' %}" class="block hover:text-gray-300">Locate</a>
             </nav>
         </div>
+
+        <div class="hidden md:block border-l border-white h-36"></div>
         
-        <div class="hidden md:block border-l border-white h-32"></div>
-        <div class="flex flex-col items-center md:items-start  space-y-4 w-full md:w-auto text-sm">
-            <h2 class="font-bold text-xl" >Legal</h2>
-            <a href="{% url 'terms' %}" class="hover:text-gray-300">Terms & Conditions</a>
-            <a href="{% url 'privacy' %}" class="hover:text-gray-300">Privacy Policy</a>
-            <a href="{% url 'refund' %}" class="hover:text-gray-300">Refund Policy</a>
+        <!-- Footer Menu 2 -->
+        <div class="flex flex-col items-center md:items-start space-y-4 w-full md:w-auto">
+            <!-- <h2 class="font-bold text-xl">Explore</h2> -->
+            <nav class="flex flex-col space-y-2 text-center md:text-left">
+                <a href="{% url 'food_menu' %}" class="block hover:text-gray-300">Food</a>
+                <a href="{% url 'bar_menu' %}" class="block hover:text-gray-300">Bar</a>
+                <a href="#" class="block hover:text-gray-300">Join Guestlist</a>
+                <a href="#" class="block hover:text-gray-300">VIP Booking</a>
+                <a href="#" class="block hover:text-gray-300">Luxury Management</a>
+            </nav>
         </div>
 
-        <div class="hidden md:block border-l border-white h-32"></div>
+        <div class="hidden md:block border-l border-white h-36"></div>
         
+        <!-- Footer Menu 3 -->
+        <div class="flex flex-col items-center md:items-start space-y-4 w-full md:w-auto">
+            <!-- <h2 class="font-bold text-xl">Legal</h2> -->
+            <nav class="flex flex-col space-y-2 text-center md:text-left">
+                <a href="{% url 'profile' %}" class="block hover:text-gray-300">My Account</a>
+                <a href="{% url 'terms' %}" class="block hover:text-gray-300">Terms & Conditions</a>
+                <a href="{% url 'privacy' %}" class="block hover:text-gray-300">Privacy Policy</a>
+                <a href="{% url 'refund' %}" class="block hover:text-gray-300">Cancellation & Refund Policy</a>
+            </nav>
+        </div>
+
+        <div class="hidden md:block border-l border-white h-36"></div>
+        
+        <!-- Social Media Links -->
         <div class="flex flex-col items-center md:items-start w-full md:w-auto space-y-4">
             <div class="flex space-x-4 mb-4 text-xl">
-                <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-youtube"></i></a>
-                <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-white hover:text-gray-300" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white hover:text-gray-300" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-white hover:text-gray-300" aria-label="Youtube"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="text-white hover:text-gray-300" aria-label="twitter"><i class="fab fa-twitter"></i></a>
             </div>
             <p class="text-center md:text-left">Phone Number: +91 98765 43210</p>
-            <p class="text-center md:text-left">Email: contact@clubrickys.com</p>
-            <iframe class="w-48 h-32 rounded-lg shadow-lg" 
-                src="https://www.google.com/maps/embed?..." 
-                allowfullscreen loading="lazy"></iframe>
+            <p class="text-center md:text-left">Email: booking.rickysclub@gmail.com</p>
         </div>
-        <div class="flex flex-col items-center md:items-start space-y-4">
-        </div>
+
     </footer>
+
+    <!-- Update the copyright section at the bottom of the footer -->
+    <div class="border-t border-white/20 py-6 px-4 md:py-10 md:px-8 text-center bg-[#C4302B]">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-sm text-white/80">
+               A Unit of Tito's Group
+            </p>
+            <p class="text-sm text-white/80 order-3 md:order-2">
+                © {% now "Y" %} Club Ricky's Goa. All rights reserved.
+            </p>
+            <p class="text-sm text-white/80 order-2 md:order-3">
+              Website Powered by <a href="https://www.cybercreative.in" class="hover:text-white">Cyber Creative</a>
+            </p>
+        </div>
+    </div>
     
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/919876543210" class="fixed bottom-6 right-6 bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors duration-300 z-50" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp text-3xl"></i>
+    </a>
     
     <!-- JavaScript to Toggle Mobile Menu -->
     <script>
-        document.getElementById("menu-btn").addEventListener("click", function () {
+        document.getElementById("mobile-menu-button").addEventListener("click", function () {
             const menu = document.getElementById("mobile-menu");
             menu.classList.toggle("hidden");
         });

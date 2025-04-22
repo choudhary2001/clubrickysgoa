@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Not Found - Club Ricky's Goa{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full text-center">
+        <!-- Error Code -->
+        <div class="relative">
+            <h1 class="text-9xl font-bold text-gray-200">404</h1>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <img src="/media/logo-1.png" alt="Club Ricky's Goa" class="h-24">
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <h2 class="mt-8 text-3xl font-extrabold text-gray-900">Page Not Found</h2>
+        <p class="mt-2 text-lg text-gray-600">
+            The page you're looking for doesn't exist or has been moved.
+        </p>
+        
+        <!-- Suggestions -->
+        <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">You might want to:</h3>
+            <ul class="space-y-3 text-left">
+                <li class="flex items-start">
+                    <span class="material-icons-outlined text-red-600 mr-2 flex-shrink-0">arrow_right</span>
+                    <span>Check the URL for typos</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="material-icons-outlined text-red-600 mr-2 flex-shrink-0">arrow_right</span>
+                    <span>Go back to the previous page</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="material-icons-outlined text-red-600 mr-2 flex-shrink-0">arrow_right</span>
+                    <span>Visit our homepage to start fresh</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <button onclick="history.back()" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700">
+                <span class="material-icons-outlined mr-2">arrow_back</span>
+                Go Back
+            </button>
+            <a href="{% url 'home' %}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                <span class="material-icons-outlined mr-2">home</span>
+                Go Home
+            </a>
+        </div>
+        
+        <!-- Contact Info -->
+        <p class="mt-8 text-sm text-gray-500">
+            Need help? Contact us at <a href="mailto:booking.rickysclub@gmail.com" class="text-red-600 hover:text-red-800">booking.rickysclub@gmail.com</a>
+        </p>
+    </div>
+</div>
+{% endblock %} 
