@@ -156,7 +156,7 @@
                                 </div>
                             {% else %}
                                 <!-- Three or more members -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
                                     {% for member in category.members.all %}
                                         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm transform transition duration-300 hover:shadow-xl">
                                             <div class="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-6 overflow-hidden">
@@ -204,7 +204,7 @@
             {% endif %}
             
             <div class="bg-white rounded-lg shadow-lg p-8">
-                <h3 class="text-2xl font-bold text-[#C4302B] mb-6">Apply Now</h3>
+                <h3 class="text-2xl font-bold text-[#C4302B] text-center mb-6">Apply Now</h3>
                 <form class="space-y-6" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="grid md:grid-cols-2 gap-6">
